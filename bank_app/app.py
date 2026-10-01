@@ -90,8 +90,6 @@ elif selected_page == "Autorizaciones":
 
 elif selected_page == "Simulador":
 
-    st.title("Simulador")
+    from bank_app.components.simulator import render_simulator
 
-    st.info(
-        "Aquí podremos simular la llegada de nuevos cobros."
-    )
+    render_simulator(bank)
