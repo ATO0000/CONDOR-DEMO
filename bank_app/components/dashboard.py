@@ -182,7 +182,7 @@ def render_dashboard(bank: BankState) -> None:
     st.write("")
 
 
-    # ========================================================
+       # ========================================================
     # SUSCRIPCIONES
     # ========================================================
 
@@ -190,15 +190,21 @@ def render_dashboard(bank: BankState) -> None:
 
     with st.container(border=True):
 
-        if not bank.subscriptions:
+        active_subscriptions = [
+            subscription
+            for subscription in bank.subscriptions
+            if subscription.status.value == "ACTIVE"
+        ]
+
+        if not active_subscriptions:
 
             st.info(
-                "Aún no hay suscripciones confirmadas."
+                "No tienes suscripciones activas."
             )
 
         else:
 
-            for subscription in bank.subscriptions[:4]:
+            for subscription in active_subscriptions[:4]:
 
                 col1, col2, col3 = st.columns(
                     [2, 1, 1]
