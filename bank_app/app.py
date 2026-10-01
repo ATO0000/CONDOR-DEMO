@@ -81,11 +81,11 @@ elif selected_page == "Suscripciones":
 
 elif selected_page == "Autorizaciones":
 
-    st.title("Autorizaciones pendientes")
-
-    st.info(
-        "Esta sección se implementará más adelante."
+    from bank_app.components.pending_approvals import (
+        render_pending_approvals,
     )
+
+    render_pending_approvals(bank)
 
 
 elif selected_page == "Simulador":
