@@ -1,0 +1,111 @@
+[
+    {
+        "customer_id": "C001",
+        "merchant_id": "SPOTIFY001",
+        "merchant": "SPOTIFY",
+        "date": "2026-01-05",
+        "amount": 5290
+    },
+    {
+        "customer_id": "C001",
+        "merchant_id": "SPOTIFY001",
+        "merchant": "SPOTIFY",
+        "date": "2026-02-05",
+        "amount": 5290
+    },
+    {
+        "customer_id": "C001",
+        "merchant_id": "SPOTIFY001",
+        "merchant": "SPOTIFY",
+        "date": "2026-03-05",
+        "amount": 5290
+    },
+
+    {
+        "customer_id": "C002",
+        "merchant_id": "SPOTIFY001",
+        "merchant": "SPOTIFY",
+        "date": "2026-01-12",
+        "amount": 5290
+    },
+    {
+        "customer_id": "C002",
+        "merchant_id": "SPOTIFY001",
+        "merchant": "SPOTIFY",
+        "date": "2026-02-12",
+        "amount": 5290
+    },
+    {
+        "customer_id": "C002",
+        "merchant_id": "SPOTIFY001",
+        "merchant": "SPOTIFY",
+        "date": "2026-03-12",
+        "amount": 5290
+    },
+
+    {
+        "customer_id": "C003",
+        "merchant_id": "SPOTIFY001",
+        "merchant": "SPOTIFY",
+        "date": "2026-01-20",
+        "amount": 6990
+    },
+    {
+        "customer_id": "C003",
+        "merchant_id": "SPOTIFY001",
+        "merchant": "SPOTIFY",
+        "date": "2026-02-20",
+        "amount": 6990
+    },
+    {
+        "customer_id": "C003",
+        "merchant_id": "SPOTIFY001",
+        "merchant": "SPOTIFY",
+        "date": "2026-03-20",
+        "amount": 6990
+    },
+
+    {
+        "customer_id": "C001",
+        "merchant_id": "SUPERMARKET001",
+        "merchant": "JUMBO",
+        "date": "2026-01-03",
+        "amount": 45890
+    },
+    {
+        "customer_id": "C001",
+        "merchant_id": "SUPERMARKET001",
+        "merchant": "JUMBO",
+        "date": "2026-01-15",
+        "amount": 18340
+    },
+    {
+        "customer_id": "C001",
+        "merchant_id": "SUPERMARKET001",
+        "merchant": "JUMBO",
+        "date": "2026-02-07",
+        "amount": 76320
+    },
+
+    {
+        "customer_id": "C002",
+        "merchant_id": "SUPERMARKET001",
+        "merchant": "JUMBO",
+        "date": "2026-01-08",
+        "amount": 25670
+    },
+    {
+        "customer_id": "C002",
+        "merchant_id": "SUPERMARKET001",
+        "merchant": "JUMBO",
+        "date": "2026-01-22",
+        "amount": 6350
+    },
+    {
+        "customer_id": "C002",
+        "merchant_id": "SUPERMARKET001",
+        "merchant": "JUMBO",
+        "date": "2026-02-18",
+        "amount": 92450
+    }
+]

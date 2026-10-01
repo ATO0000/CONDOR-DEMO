@@ -1,0 +1,76 @@
+[
+    {
+        "merchant": "SPOTIFY",
+        "network": "MASTERCARD",
+        "amount": 5290,
+        "currency": "CLP",
+        "cit_mit_indicator": "C103",
+        "pos_environment": null,
+        "cardholder_present": false,
+        "ecommerce": true,
+        "stored_credential": true,
+        "three_ds_recurring": null
+    },
+    {
+        "merchant": "NETFLIX.COM",
+        "network": "VISA",
+        "amount": 9990,
+        "currency": "CLP",
+        "cit_mit_indicator": null,
+        "pos_environment": "R",
+        "cardholder_present": false,
+        "ecommerce": true,
+        "stored_credential": true,
+        "three_ds_recurring": null
+    },
+    {
+        "merchant": "UBER *TRIP",
+        "network": "MASTERCARD",
+        "amount": 8650,
+        "currency": "CLP",
+        "cit_mit_indicator": "C101",
+        "pos_environment": null,
+        "cardholder_present": false,
+        "ecommerce": true,
+        "stored_credential": true,
+        "three_ds_recurring": null
+    },
+    {
+        "merchant": "STARBUCKS STORE 103",
+        "network": "VISA",
+        "amount": 4900,
+        "currency": "CLP",
+        "cit_mit_indicator": null,
+        "pos_environment": null,
+        "cardholder_present": true,
+        "ecommerce": false,
+        "stored_credential": false,
+        "three_ds_recurring": null
+    },
+    {
+        "merchant": "UNKNOWN DIGITAL SERVICE",
+        "network": "VISA",
+        "amount": 12990,
+        "currency": "CLP",
+        "cit_mit_indicator": null,
+        "pos_environment": "C",
+        "cardholder_present": false,
+        "ecommerce": true,
+        "stored_credential": true,
+        "three_ds_recurring": null,
+        "merchant_subscription_probability": 0.98
+    },
+    {
+    "merchant": "SPOTIFY WEB",
+    "merchant_id": "SPOTIFY001",
+    "network": "VISA",
+    "amount": 5290,
+    "currency": "CLP",
+    "cit_mit_indicator": null,
+    "pos_environment": null,
+    "cardholder_present": false,
+    "ecommerce": true,
+    "stored_credential": true,
+    "three_ds_recurring": null
+}
+]
