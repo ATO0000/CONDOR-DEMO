@@ -1,0 +1,1296 @@
+<title>Escudo de Suscripciones</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700&display=swap">
+<style>
+/* Layout: banca web con barra de marca fija, pestañas principales y contenido a una columna (máx. 1120px). El Escudo vive dentro de Tarjetas. */
+:root{
+  --bg:#edf1ef; --surface:#ffffff; --surface-2:#f3f6f5; --ink:#13221f; --muted:#5a6c67; --line:#d8e0dd;
+  --brand:#0e463f; --on-brand:#eef8f5; --on-brand-10:rgba(238,248,245,.12); --on-brand-70:rgba(238,248,245,.74);
+  --primary:#0f5c52; --primary-hover:#0b4a42; --on-primary:#ffffff;
+  --accent:#e3a52b; --on-accent:#2b1d00;
+  --ok:#1b7446; --ok-soft:#e2f2e8; --warn:#9a5b00; --warn-soft:#fcefd8;
+  --bad:#b1271f; --bad-soft:#fce8e6; --bad-line:#efbcb7; --on-bad:#ffffff;
+  --info:#2458a0; --info-soft:#e5edf9;
+  --track:#c9d3d0; --knob:#ffffff; --bar:#8fb3ab; --scrim:rgba(10,20,18,.45); --focus:#2a7de1;
+  --shadow:0 1px 2px rgba(16,33,30,.06),0 6px 20px rgba(16,33,30,.07);
+  --f-display:'Sora','Segoe UI',system-ui,sans-serif;
+  --f-body:'Manrope','Segoe UI',system-ui,sans-serif;
+  --r-md:12px; --r-lg:18px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0b1311; --surface:#121c1a; --surface-2:#182421; --ink:#e3ece9; --muted:#93a59f; --line:#26332f;
+    --brand:#0c2e29; --on-brand:#e6f4ef; --on-brand-10:rgba(230,244,239,.10); --on-brand-70:rgba(230,244,239,.72);
+    --primary:#46b9a5; --primary-hover:#5fcab7; --on-primary:#062019;
+    --accent:#e9b453; --on-accent:#2b1d00;
+    --ok:#55c98f; --ok-soft:#10301f; --warn:#f0ab45; --warn-soft:#33240b;
+    --bad:#f2857b; --bad-soft:#381715; --bad-line:#6a2b26; --on-bad:#2a0806;
+    --info:#8ab6f5; --info-soft:#15253d;
+    --track:#34443f; --knob:#e3ece9; --bar:#4d7d73; --scrim:rgba(0,0,0,.6); --focus:#7fb3ff;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.3);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0b1311; --surface:#121c1a; --surface-2:#182421; --ink:#e3ece9; --muted:#93a59f; --line:#26332f;
+  --brand:#0c2e29; --on-brand:#e6f4ef; --on-brand-10:rgba(230,244,239,.10); --on-brand-70:rgba(230,244,239,.72);
+  --primary:#46b9a5; --primary-hover:#5fcab7; --on-primary:#062019;
+  --accent:#e9b453; --on-accent:#2b1d00;
+  --ok:#55c98f; --ok-soft:#10301f; --warn:#f0ab45; --warn-soft:#33240b;
+  --bad:#f2857b; --bad-soft:#381715; --bad-line:#6a2b26; --on-bad:#2a0806;
+  --info:#8ab6f5; --info-soft:#15253d;
+  --track:#34443f; --knob:#e3ece9; --bar:#4d7d73; --scrim:rgba(0,0,0,.6); --focus:#7fb3ff;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.3);
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:var(--f-display);margin:0;line-height:1.2;text-wrap:balance;letter-spacing:-.01em;font-weight:600}
+h1{font-size:1.7rem} h2{font-size:1.3rem} h3{font-size:1.08rem} h4{font-size:.95rem}
+p{margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.small{font-size:.83rem}
+.strong{font-weight:700}
+.min0{min-width:0}
+.eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+
+/* ---------- Barra del banco ---------- */
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:var(--brand);color:var(--on-brand)}
+.topbar-in{max-width:1120px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px}
+.logo{display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-weight:700;font-size:1.12rem;white-space:nowrap}
+.proto{font-size:.66rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:var(--on-brand-10);color:var(--on-brand-70);white-space:nowrap}
+.top-actions{margin-left:auto;display:flex;align-items:center;gap:8px}
+.icon-btn{position:relative;width:40px;height:40px;border-radius:999px;border:0;background:transparent;color:var(--on-brand);display:grid;place-items:center}
+.icon-btn:hover{background:var(--on-brand-10)}
+.badge-count{position:absolute;top:3px;right:2px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--accent);color:var(--on-accent);font-size:.68rem;font-weight:800;display:grid;place-items:center}
+.avatar{width:36px;height:36px;border-radius:999px;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-weight:800;font-size:.82rem;flex:none}
+.user-name{font-weight:600;font-size:.88rem;line-height:1.2}
+.user-name small{display:block;font-weight:500;color:var(--on-brand-70);font-size:.74rem}
+.nav{border-top:1px solid var(--on-brand-10)}
+.nav-in{max-width:1120px;margin:0 auto;padding:0 8px;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+.nav-in::-webkit-scrollbar{display:none}
+.nav button{background:none;border:0;color:var(--on-brand-70);padding:12px 14px 10px;font-weight:700;font-size:.9rem;white-space:nowrap;border-bottom:3px solid transparent;display:flex;align-items:center;gap:6px}
+.nav button:hover{color:var(--on-brand)}
+.nav button[aria-current="page"]{color:var(--on-brand);border-bottom-color:var(--accent)}
+.nav .dot{min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--accent);color:var(--on-accent);font-size:.68rem;display:grid;place-items:center}
+
+main{max-width:1120px;margin:0 auto;padding-inline:16px;padding-block:24px 140px;display:flex;flex-direction:column;gap:22px}
+.page-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.page-head p.eyebrow{margin-bottom:4px}
+
+/* ---------- Superficies ---------- */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:20px;display:flex;flex-direction:column;gap:16px;min-width:0}
+.sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.sec-head .eyebrow{margin-bottom:2px}
+
+/* ---------- Botones ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 14px;border-radius:10px;font-weight:700;font-size:.86rem;white-space:nowrap;line-height:1.2}
+.btn:hover{background:var(--surface-2)}
+.btn-primary{background:var(--primary);border-color:var(--primary);color:var(--on-primary)}
+.btn-primary:hover{background:var(--primary-hover)}
+.btn-danger{color:var(--bad);border-color:var(--bad-line);background:transparent}
+.btn-danger:hover{background:var(--bad-soft)}
+.btn-danger-solid{background:var(--bad);border-color:var(--bad);color:var(--on-bad)}
+.btn-danger-solid:hover{filter:brightness(1.06);background:var(--bad)}
+.btn-sm{padding:6px 10px;font-size:.8rem}
+.btn-link{border:0;background:none;padding:0;font-weight:700;color:var(--ink);text-align:left;font-size:inherit}
+.btn-link:hover{text-decoration:underline}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+
+/* ---------- Chips / pills ---------- */
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:.73rem;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--surface-2);color:var(--muted);white-space:nowrap;line-height:1.4}
+.chip.bad{background:var(--bad-soft);color:var(--bad)}
+.chip.warn{background:var(--warn-soft);color:var(--warn)}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}
+.chip.info{background:var(--info-soft);color:var(--info)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+
+/* ---------- Inicio ---------- */
+.acc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.acc{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:18px;display:flex;flex-direction:column;gap:4px}
+.acc .big{font-family:var(--f-display);font-size:1.5rem;font-weight:600}
+.promo{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:16px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:18px 20px}
+.promo .shield{width:48px;height:48px;border-radius:14px;background:var(--brand);color:var(--accent);display:grid;place-items:center}
+@media (max-width:640px){.promo{grid-template-columns:auto minmax(0,1fr)} .promo .btns{grid-column:1/-1}}
+
+/* ---------- Tarjetas ---------- */
+.cards-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.bank-card{border-radius:18px;padding:18px 20px;color:#f4fbf8;display:flex;flex-direction:column;gap:18px;min-height:150px;position:relative;overflow:hidden;box-shadow:var(--shadow)}
+.bank-card.credit{background:linear-gradient(135deg,#0e463f 0%,#146a5d 60%,#1f8a78 100%)}
+.bank-card.debit{background:linear-gradient(135deg,#27313a 0%,#3b4854 60%,#56636f 100%)}
+.bank-card::after{content:"";position:absolute;right:-40px;top:-40px;width:160px;height:160px;border-radius:50%;border:26px solid rgba(255,255,255,.07)}
+.bank-card .t{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;font-weight:700;font-size:.9rem}
+.bank-card .n{font-family:var(--f-display);font-size:1.15rem;letter-spacing:.12em}
+.bank-card .b{display:flex;justify-content:space-between;gap:12px;font-size:.8rem;color:rgba(244,251,248,.8)}
+.bank-card .b strong{display:block;color:#f4fbf8;font-size:.95rem}
+.chip-el{width:34px;height:26px;border-radius:6px;background:linear-gradient(135deg,#e8c56a,#b98f2e)}
+.subnav{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
+.subnav button{border:0;background:none;padding:10px 12px;font-weight:700;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.subnav button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--primary)}
+.new-tag{font-size:.64rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;background:var(--accent);color:var(--on-accent);padding:2px 6px;border-radius:6px}
+
+/* ---------- Escudo ---------- */
+.escudo-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+.escudo-id{display:flex;gap:14px;align-items:flex-start;max-width:720px}
+.escudo-id .shield{width:52px;height:52px;border-radius:15px;background:var(--brand);color:var(--accent);display:grid;place-items:center;flex:none}
+.escudo-id p{margin-top:4px;max-width:62ch}
+.mode-pill{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 14px;font-weight:700;font-size:.8rem;color:var(--muted);display:flex;align-items:center;gap:8px}
+.mode-pill:hover{color:var(--ink)}
+.mode-pill .led{width:8px;height:8px;border-radius:50%;background:var(--ok)}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:900px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.kpi .v{font-family:var(--f-display);font-size:1.45rem;font-weight:600;font-variant-numeric:tabular-nums}
+.kpi.crit{background:var(--bad-soft);border-color:var(--bad-line)}
+.kpi.crit .v{color:var(--bad)}
+.kpi .l{font-size:.78rem;font-weight:700;color:var(--muted)}
+.kpi .s{font-size:.78rem;color:var(--muted)}
+
+.m-av{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;color:#fff;font-weight:800;font-family:var(--f-display);font-size:.95rem;flex:none}
+.row-title{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;font-weight:700}
+
+.held-list,.aviso-list{display:flex;flex-direction:column;gap:10px}
+.held{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:14px 16px;align-items:center;padding:16px;border-radius:14px;background:var(--bad-soft);border:1px solid var(--bad-line)}
+.held p{margin-top:3px}
+.aviso{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:14px 16px;align-items:center;padding:14px 16px;border-radius:14px;background:var(--surface-2)}
+.aviso p{margin-top:3px}
+@media (max-width:760px){
+  .held,.aviso{grid-template-columns:44px minmax(0,1fr)}
+  .held .btns,.aviso .btns{grid-column:1/-1}
+}
+.calm{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;background:var(--ok-soft);color:var(--ok);font-weight:700;font-size:.9rem}
+
+.seg{display:inline-flex;padding:4px;background:var(--surface-2);border-radius:12px;gap:4px;flex-wrap:wrap}
+.seg button{border:0;background:transparent;padding:7px 12px;border-radius:9px;font-weight:700;font-size:.84rem;color:var(--muted);display:flex;align-items:center;gap:6px}
+.seg button[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.seg .n{font-size:.72rem;background:var(--line);color:var(--ink);border-radius:999px;padding:1px 7px;font-variant-numeric:tabular-nums}
+.seg button[data-id="noconf"] .n{background:var(--warn-soft);color:var(--warn)}
+.seg button[data-id="conf"] .n{background:var(--ok-soft);color:var(--ok)}
+.list-note{font-size:.86rem;color:var(--muted);max-width:75ch}
+
+.sub-list{display:flex;flex-direction:column}
+.sub-row{display:grid;grid-template-columns:44px minmax(0,1.7fr) minmax(0,.7fr) minmax(0,.8fr) auto;gap:10px 18px;align-items:center;padding:16px 2px;border-top:1px solid var(--line)}
+.sub-row:first-child{border-top:0}
+.sub-row .c-info{display:flex;flex-direction:column;gap:6px}
+.sub-row .amt{font-family:var(--f-display);font-weight:600;font-size:1.05rem;font-variant-numeric:tabular-nums}
+.sub-row .c-acc{display:flex;align-items:center;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+@media (max-width:860px){
+  .sub-row{grid-template-columns:44px minmax(0,1fr) minmax(0,1fr)}
+  .sub-row .c-info{grid-column:2/-1}
+  .sub-row .c-monto{grid-column:2}
+  .sub-row .c-fecha{grid-column:3}
+  .sub-row .c-acc{grid-column:2/-1;justify-content:flex-start}
+}
+.empty{padding:28px 12px;text-align:center;color:var(--muted);font-size:.9rem}
+
+.switch{display:inline-flex;align-items:center;gap:8px;background:none;border:0;padding:4px 2px;font-weight:700;font-size:.82rem;color:var(--muted);white-space:nowrap}
+.switch .track{width:38px;height:22px;border-radius:999px;background:var(--track);position:relative;transition:background .15s;flex:none}
+.switch .track::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:var(--knob);transition:transform .15s;box-shadow:0 1px 2px rgba(0,0,0,.25)}
+.switch[aria-checked="true"]{color:var(--ok)}
+.switch[aria-checked="true"] .track{background:var(--ok)}
+.switch[aria-checked="true"] .track::after{transform:translateX(16px)}
+
+details.how{border-top:1px solid var(--line);padding-top:14px}
+details.how summary{cursor:pointer;font-weight:700;font-size:.9rem}
+details.how ol{margin:12px 0 0;padding-left:22px;display:flex;flex-direction:column;gap:6px;font-size:.88rem;max-width:80ch}
+
+/* ---------- Movimientos ---------- */
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.88rem;min-width:620px}
+th{text-align:left;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700;padding:8px 10px;border-bottom:1px solid var(--line)}
+td{padding:11px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+td.r,th.r{text-align:right}
+tr:last-child td{border-bottom:0}
+
+/* ---------- Configuración ---------- */
+.cfg-group{display:flex;flex-direction:column;gap:10px}
+.opt{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:start;padding:14px;border:1px solid var(--line);border-radius:12px;cursor:pointer}
+.opt:has(input:checked){border-color:var(--primary);background:var(--surface-2)}
+.opt input{margin-top:4px;accent-color:var(--primary)}
+.opt p{font-size:.86rem;color:var(--muted);margin-top:2px}
+.radio-row{display:flex;gap:8px;flex-wrap:wrap}
+.radio-row label{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-weight:700;font-size:.86rem;cursor:pointer}
+.radio-row label:has(input:checked){border-color:var(--primary);background:var(--surface-2)}
+.radio-row input{accent-color:var(--primary)}
+
+/* ---------- Modal / hoja lateral ---------- */
+.overlay{position:fixed;inset:0;background:var(--scrim);z-index:60;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal{background:var(--surface);color:var(--ink);border-radius:18px;max-width:520px;width:100%;max-height:calc(100% - 32px);overflow:auto;padding:24px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:16px}
+.overlay.sheet{justify-content:flex-end;align-items:stretch;padding:0}
+.overlay.sheet .modal{max-width:580px;border-radius:0;max-height:none;height:100%;padding:calc(20px + env(safe-area-inset-top,0px)) 22px calc(24px + env(safe-area-inset-bottom,0px));gap:22px}
+.sheet-head{display:flex;gap:14px;align-items:center}
+.sheet-head .x{margin-left:auto}
+.x{width:36px;height:36px;border-radius:999px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;flex:none;color:var(--ink)}
+.x:hover{background:var(--surface-2)}
+.sheet-sec{display:flex;flex-direction:column;gap:10px}
+.sheet-sec h4{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.trust-box{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 16px;border-radius:14px;background:var(--surface-2);flex-wrap:wrap}
+.facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.fact{background:var(--surface-2);border-radius:12px;padding:10px 12px}
+.fact .l{font-size:.74rem;color:var(--muted);font-weight:700}
+.fact .v{font-weight:700;font-variant-numeric:tabular-nums}
+.verdict{padding:12px 14px;border-radius:12px;font-size:.88rem;font-weight:600}
+.verdict.pay{background:var(--ok-soft);color:var(--ok)}
+.verdict.hold{background:var(--bad-soft);color:var(--bad)}
+.verdict.block{background:var(--surface-2);color:var(--muted)}
+.resumen{font-size:.92rem;line-height:1.55}
+.clauses{display:flex;flex-direction:column;gap:8px}
+.clause{border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.clause .h{display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:700;font-size:.88rem;flex-wrap:wrap}
+.clause blockquote{margin:0;font-size:.85rem;color:var(--muted);font-style:italic;line-height:1.5}
+.clause .ref{font-size:.74rem;color:var(--muted)}
+.conf{height:8px;border-radius:999px;background:var(--surface-2);overflow:hidden}
+.conf span{display:block;height:100%;background:var(--primary);border-radius:999px}
+.reasons{margin:0;padding-left:20px;font-size:.88rem;display:flex;flex-direction:column;gap:4px}
+.bars{display:flex;align-items:flex-end;gap:8px;height:120px;padding-top:18px}
+.bars .col{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end}
+.bars .bar{width:100%;max-width:40px;border-radius:6px 6px 2px 2px;background:var(--bar)}
+.bars .bar.retenido{background:var(--bad)}
+.bars .bar.rechazado,.bars .bar.bloqueado{background:transparent;border:1.5px dashed var(--muted)}
+.bars .lbl{font-size:.68rem;color:var(--muted);white-space:nowrap}
+.bars .val{font-size:.66rem;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.hist-list{display:flex;flex-direction:column;font-size:.86rem}
+.hist-list div{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line)}
+.hist-list div:last-child{border-bottom:0}
+.note{padding:12px 14px;border-radius:12px;font-size:.86rem;background:var(--info-soft);color:var(--info)}
+.note.warn{background:var(--warn-soft);color:var(--warn)}
+.sheet-foot{display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:16px;margin-top:auto}
+
+/* ---------- Notificaciones ---------- */
+.notif-pop{position:fixed;top:calc(64px + env(safe-area-inset-top,0px));right:16px;width:min(390px,calc(100vw - 32px));max-height:min(520px,calc(100vh - 120px));overflow:auto;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);z-index:50;display:flex;flex-direction:column}
+.notif-pop header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--surface)}
+.notif{display:grid;grid-template-columns:10px minmax(0,1fr);gap:10px;padding:12px 16px;border:0;border-bottom:1px solid var(--line);text-align:left;background:transparent;width:100%}
+.notif:hover{background:var(--surface-2)}
+.notif .led{width:9px;height:9px;border-radius:50%;margin-top:6px;background:var(--muted)}
+.notif .led.alerta{background:var(--bad)} .notif .led.ok{background:var(--ok)} .notif .led.info{background:var(--info)}
+.notif .t{font-weight:700;font-size:.87rem}
+.notif .d{font-size:.82rem;color:var(--muted)}
+.notif.unread{background:var(--surface-2)}
+
+/* ---------- Panel de simulación ---------- */
+.demo{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:40;width:min(330px,calc(100vw - 32px));background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
+.demo-toggle{width:100%;display:flex;align-items:center;gap:10px;border:0;background:none;padding:12px 14px;text-align:left}
+.demo-toggle .clock{width:32px;height:32px;border-radius:10px;background:var(--brand);color:var(--accent);display:grid;place-items:center;flex:none}
+.demo-toggle .chev{margin-left:auto;transition:transform .15s}
+.demo[data-open="true"] .demo-toggle .chev{transform:rotate(180deg)}
+.demo-body{padding:0 14px 14px;display:flex;flex-direction:column;gap:8px}
+.demo-body .btn{width:100%;justify-content:flex-start}
+.demo-body p{font-size:.78rem;color:var(--muted)}
+
+/* ---------- Toast ---------- */
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:70;background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:12px;font-weight:600;font-size:.88rem;max-width:calc(100vw - 32px);box-shadow:var(--shadow);transition:opacity .2s}
+@media (max-width:700px){.toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="logo">
+      <svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true"><circle cx="16" cy="16" r="15" fill="var(--accent)"/><path d="M16 7v18M7 16h18M10.5 10.5l11 11M21.5 10.5l-11 11" stroke="var(--brand)" stroke-width="2.2" stroke-linecap="round"/></svg>
+      Banco Lumen
+    </div>
+    <span class="proto">Prototipo · banco ficticio</span>
+    <div class="top-actions">
+      <button class="icon-btn" id="bell" data-act="bell" aria-label="Notificaciones">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 1112 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10.3 20a1.9 1.9 0 003.4 0"/></svg>
+        <span class="badge-count" id="bell-count" hidden>0</span>
+      </button>
+      <div class="avatar" aria-hidden="true">CR</div>
+      <div class="user-name" id="user-name">Camila Rojas<small>Cliente Lumen</small></div>
+    </div>
+  </div>
+  <nav class="nav" aria-label="Secciones del banco">
+    <div class="nav-in">
+      <button data-act="tab" data-id="inicio">Inicio</button>
+      <button data-act="tab" data-id="cuentas">Cuentas</button>
+      <button data-act="tab" data-id="tarjetas">Tarjetas <span class="dot" id="nav-dot" hidden></span></button>
+      <button data-act="tab" data-id="transferencias">Transferencias</button>
+      <button data-act="tab" data-id="pagos">Pagos</button>
+    </div>
+  </nav>
+</header>
+
+<main id="view"></main>
+
+<div id="notif-root"></div>
+<div id="modal-root"></div>
+
+<aside class="demo" id="demo" data-open="false" aria-label="Panel de simulación">
+  <button class="demo-toggle" data-act="demo">
+    <span class="clock"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+    <span><span class="eyebrow" style="display:block">Simulación</span><strong class="num" id="demo-fecha">—</strong></span>
+    <svg class="chev" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>
+  </button>
+  <div class="demo-body" id="demo-body" hidden>
+    <p>Mueve el calendario para ver cómo el Escudo paga, retiene o bloquea cada cobro.</p>
+    <button class="btn" data-act="avanzar">Avanzar 1 día</button>
+    <button class="btn" data-act="proximo">Saltar al próximo cobro</button>
+    <button class="btn" data-act="oculta">Simular compra con suscripción oculta</button>
+    <button class="btn btn-danger" data-act="reset">Reiniciar demo</button>
+  </div>
+</aside>
+
+<div class="toast" id="toast" hidden></div>
+
+<script>
+/* =========================================================
+   Datos base del prototipo (comercios y banco ficticios)
+   ========================================================= */
+const HOY_INICIAL = '2026-09-29';
+const CLAVE_STORAGE = 'escudo-suscripciones-v1';
+const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+
+const TARJETAS = {
+  C4821: { id:'C4821', nombre:'Visa Signature', tipo:'Crédito', num:'4821', cupo:2500000 },
+  D1107: { id:'D1107', nombre:'Débito Cuenta Corriente', tipo:'Débito', num:'1107' }
+};
+
+/* Catálogo de comercios de suscripción conocido por el banco + análisis de T&C.
+   esperado: precio previsto del próximo cobro (null = mismo que el último).
+   real: lo que el comercio realmente cobrará (el banco no lo sabe de antemano). */
+const CATALOGO = {
+  STREAMFLIX: {
+    nombre:'StreamFlix', cat:'Streaming de video', tipo:'Suscripción', color:'#b3362c',
+    esperado:9490, real:9490,
+    fuentePrecio:'Aviso del comercio del 21 sep 2026, contrastado con sus T&C v4.2',
+    cancelacion:'En línea, desde la configuración de la cuenta (4 pasos).',
+    tc:{ riesgo:'alto', version:'T&C v4.2 · vigentes desde el 14 sep 2026',
+      resumen:'Se renueva cada mes sin pedir confirmación. El comercio puede subir el precio avisando solo por correo con 7 días de anticipación, y seguir usando el servicio cuenta como aceptación. Ya anunció un alza a $9.490 desde octubre.',
+      clausulas:[
+        { sev:'alto', titulo:'Cambio de precio unilateral', ref:'Sección 3.2', cita:'StreamFlix podrá modificar el precio de la membresía notificando al usuario por correo electrónico con al menos 7 días de anticipación. El uso continuado del servicio constituye aceptación del nuevo precio.' },
+        { sev:'medio', titulo:'Renovación automática', ref:'Sección 3.1', cita:'La membresía se renovará automáticamente al final de cada período de facturación hasta que sea cancelada.' },
+        { sev:'bajo', titulo:'Sin permanencia mínima', ref:'Sección 5', cita:'Puede cancelar en cualquier momento; el acceso se mantiene hasta el fin del período pagado.' }
+      ]}
+  },
+  SONORA: {
+    nombre:'Sonora Music', cat:'Música', tipo:'Suscripción', color:'#1f8a5b',
+    esperado:null, real:null,
+    fuentePrecio:'Precio garantizado por contrato hasta mar 2027',
+    cancelacion:'En línea, en 2 pasos y sin multas.',
+    tc:{ riesgo:'bajo', version:'Términos del plan Premium · mar 2026',
+      resumen:'Plan individual mensual con precio garantizado hasta marzo de 2027. Se cancela en línea en dos pasos y no tiene multas.',
+      clausulas:[
+        { sev:'bajo', titulo:'Precio garantizado 12 meses', ref:'Cláusula 4', cita:'El precio del plan Premium Individual se mantendrá sin cambios durante 12 meses desde la contratación.' },
+        { sev:'medio', titulo:'Renovación automática', ref:'Cláusula 2', cita:'La suscripción se renueva mensualmente de forma automática.' }
+      ]}
+  },
+  NUBEBOX: {
+    nombre:'NubeBox', cat:'Almacenamiento en la nube', tipo:'Suscripción', color:'#2f6fb5',
+    esperado:null, real:34990,
+    fuentePrecio:'El comercio no publica el precio de renovación',
+    cancelacion:'En línea. No hay reembolso del año en curso.',
+    tc:{ riesgo:'alto', version:'Condiciones de servicio · ed. 2025',
+      resumen:'Se renueva cada año al precio de lista vigente ese día, sin aviso por correo y sin reembolso. El monto de la próxima renovación no está publicado, así que no podemos anticiparlo: si llega más alto, retendremos el cobro.',
+      clausulas:[
+        { sev:'alto', titulo:'Renovación al precio vigente', ref:'Art. 6.1', cita:'La suscripción anual se renovará automáticamente al precio de lista vigente en la fecha de renovación.' },
+        { sev:'medio', titulo:'Sin reembolso', ref:'Art. 6.4', cita:'Los pagos anuales no son reembolsables, total ni parcialmente.' },
+        { sev:'medio', titulo:'Aviso solo dentro de la app', ref:'Art. 9', cita:'Las notificaciones de renovación se mostrarán en el panel de la cuenta del usuario.' }
+      ]}
+  },
+  FITMAX: {
+    nombre:'FitMax Gimnasio', cat:'Gimnasio', tipo:'Suscripción', color:'#c4611a',
+    esperado:34990, real:34990,
+    fuentePrecio:'Fin del precio promocional según contrato (cláusula 3)',
+    cancelacion:'Presencial en la sucursal de origen, por escrito y con 30 días de aviso.',
+    tc:{ riesgo:'alto', version:'Contrato de afiliación · plan Promo 3M',
+      resumen:'Pagas un precio promocional de $24.990 solo por 3 meses; desde el cuarto mes pasa a $34.990. Tiene permanencia mínima de 12 meses y solo se puede cancelar en persona con 30 días de aviso.',
+      clausulas:[
+        { sev:'alto', titulo:'Fin de la promoción', ref:'Cláusula 3', cita:'El precio promocional aplica a las primeras 3 mensualidades. A partir de la cuarta, se cobrará la tarifa regular de $34.990.' },
+        { sev:'alto', titulo:'Permanencia mínima', ref:'Cláusula 7', cita:'El plan tiene una duración mínima de 12 meses. El término anticipado genera un cargo equivalente a 2 mensualidades.' },
+        { sev:'alto', titulo:'Cancelación presencial', ref:'Cláusula 8', cita:'La desafiliación deberá solicitarse presencialmente en la sucursal de origen, por escrito y con 30 días de anticipación.' }
+      ]}
+  },
+  PHOTOMAGIC: {
+    nombre:'PhotoMagic Pro', cat:'App de edición de fotos', tipo:'Suscripción', color:'#8a3fb8',
+    trialDias:7, esperado:6990, real:6990,
+    fuentePrecio:'Condiciones de la prueba publicadas en la tienda de apps',
+    cancelacion:'Solo desde la app móvil, en Ajustes > Suscripción.',
+    tc:{ riesgo:'alto', version:'Condiciones de prueba · v2',
+      resumen:'Pagaste $1.990 por una prueba de 7 días. No es una compra única: si no cancelas, se convierte en una suscripción de $6.990 al mes y el comercio no envía recordatorio antes de cobrar.',
+      clausulas:[
+        { sev:'alto', titulo:'Prueba que se convierte en pago', ref:'Condiciones de prueba, punto 1', cita:'Al finalizar el período de prueba de 7 días, se cobrará automáticamente la tarifa mensual de $6.990 hasta que el usuario cancele.' },
+        { sev:'alto', titulo:'Sin aviso antes del cobro', ref:'Condiciones de prueba, punto 3', cita:'No se enviará recordatorio antes del término del período de prueba.' },
+        { sev:'medio', titulo:'Cancelación limitada', ref:'Preguntas frecuentes', cita:'La suscripción solo puede cancelarse desde la aplicación móvil.' }
+      ]}
+  },
+  MIRADOR: {
+    nombre:'El Mirador Digital', cat:'Noticias', tipo:'Suscripción', color:'#3d4b5c',
+    esperado:null, real:null,
+    fuentePrecio:'Sin reajuste anunciado',
+    cancelacion:'Por formulario web; se procesa en 5 días hábiles.',
+    tc:{ riesgo:'medio', version:'Condiciones de suscripción digital · 2026',
+      resumen:'Suscripción digital mensual. Puede reajustar el precio según el IPC cada 6 meses, avisando con 15 días de anticipación.',
+      clausulas:[
+        { sev:'medio', titulo:'Reajuste por IPC', ref:'Punto 4', cita:'El precio podrá reajustarse semestralmente según la variación del IPC, informando con 15 días de anticipación.' },
+        { sev:'medio', titulo:'Renovación automática', ref:'Punto 2', cita:'La suscripción se renueva mensualmente mientras no sea cancelada.' }
+      ]}
+  },
+  GAMEVAULT: {
+    nombre:'GameVault Plus', cat:'Videojuegos', tipo:'Suscripción', color:'#5a3fc0',
+    esperado:null, real:6990,
+    fuentePrecio:'Sin anuncio del comercio',
+    cancelacion:'En línea, desde la consola o la web.',
+    tc:{ riesgo:'alto', version:'Términos de GameVault Plus · rev. 11',
+      resumen:'Los términos permiten cambiar el precio en cualquier momento y no fijan un plazo de aviso. En septiembre intentó cobrar $6.990 en vez de $5.990 sin avisar.',
+      clausulas:[
+        { sev:'alto', titulo:'Cambio de precio sin plazo de aviso', ref:'Sección 8', cita:'GameVault se reserva el derecho de modificar los precios de sus planes en cualquier momento.' },
+        { sev:'medio', titulo:'Renovación automática', ref:'Sección 2', cita:'La membresía se renueva automáticamente cada mes con el medio de pago registrado.' }
+      ]}
+  },
+  TELENOVA: {
+    nombre:'TeleNova Plan Móvil', cat:'Telefonía (PAT)', tipo:'Cobro recurrente', color:'#0f7c8c',
+    esperado:null, real:null,
+    fuentePrecio:'Precio fijo por contrato',
+    cancelacion:'Cambio o término de plan en sucursal o por teléfono.',
+    tc:{ riesgo:'bajo', version:'Contrato de servicio móvil · 18 meses',
+      resumen:'Pago automático (PAT) de tu plan móvil. Precio fijo por un contrato de 18 meses que vence en marzo de 2027.',
+      clausulas:[
+        { sev:'bajo', titulo:'Precio fijo por contrato', ref:'Contrato, cláusula 2', cita:'El valor del plan se mantiene fijo durante los 18 meses de vigencia del contrato.' }
+      ]}
+  },
+  LUZVALLE: {
+    nombre:'Luz del Valle', cat:'Electricidad (PAT)', tipo:'Cobro recurrente', color:'#9a6f00',
+    variable:true, esperado:null, real:36900,
+    fuentePrecio:'Monto variable según consumo',
+    cancelacion:'Se desactiva el PAT; la cuenta se sigue pagando por otro medio.',
+    tc:{ riesgo:'bajo', version:'Mandato de pago automático (PAT)',
+      resumen:'Cuenta de electricidad con pago automático. El monto cambia según tu consumo, así que la comparamos con tu promedio de los últimos 6 meses y solo la retenemos si se sale del margen que definiste.',
+      clausulas:[
+        { sev:'bajo', titulo:'Monto variable', ref:'Mandato PAT', cita:'El monto a pagar corresponde al consumo del período más los cargos fijos vigentes.' }
+      ]}
+  },
+  PROTEGEYA: {
+    nombre:'ProtegeYa Seguro Celular', cat:'Seguro', tipo:'Suscripción', color:'#2c6e49',
+    esperado:null, real:null,
+    fuentePrecio:'Sin cambios anunciados',
+    cancelacion:'Solo llamando al servicio al cliente.',
+    tc:{ riesgo:'medio', version:'Póliza de seguro de equipo móvil',
+      resumen:'Seguro de celular que se agregó al comprar tu equipo en tienda. Se renueva cada mes y solo se puede cancelar por teléfono.',
+      clausulas:[
+        { sev:'medio', titulo:'Contratación incluida en la compra', ref:'Póliza, art. 1', cita:'El seguro se incorpora al momento de la compra del equipo, salvo que el cliente lo rechace expresamente.' },
+        { sev:'medio', titulo:'Cancelación solo por teléfono', ref:'Póliza, art. 12', cita:'La renuncia debe solicitarse llamando al servicio al cliente.' }
+      ]}
+  },
+  VPNSHIELD: {
+    nombre:'VPN Shield', cat:'Seguridad / VPN', tipo:'Suscripción', color:'#334e9e',
+    trialDias:3, esperado:5490, real:5490,
+    fuentePrecio:'Condiciones del acceso de prueba',
+    cancelacion:'Solo desde la web del comercio, con inicio de sesión.',
+    tc:{ riesgo:'alto', version:'Términos del acceso de 3 días',
+      resumen:'Pagaste $990 por un acceso de 3 días que parece una compra única. La letra chica activa un plan mensual de $5.490 al tercer día si no cancelas.',
+      clausulas:[
+        { sev:'alto', titulo:'Compra única que es suscripción', ref:'Términos, punto 2', cita:'Al término del acceso de 3 días, el usuario será inscrito en el plan mensual a $5.490, que se renovará automáticamente.' },
+        { sev:'medio', titulo:'Cancelación limitada', ref:'Términos, punto 6', cita:'La cancelación solo puede realizarse desde el sitio web, con la cuenta del usuario.' }
+      ]}
+  }
+};
+
+function serie(desde, n, monto){
+  const out = [];
+  for(let i = 0; i < n; i++) out.push([addMeses(desde, i), monto]);
+  return out;
+}
+
+/* Historial de cobros de comercios recurrentes (la detección NO lee esta lista: lee los movimientos) */
+const HIST = [
+  { key:'STREAMFLIX', desc:'STREAMFLIX*SUSCRIPCION', tarjeta:'C4821', cobros:serie('2026-04-03', 6, 7990) },
+  { key:'SONORA',     desc:'SONORA MUSIC PREMIUM',   tarjeta:'C4821', cobros:serie('2026-04-12', 6, 4990) },
+  { key:'NUBEBOX',    desc:'NUBEBOX STORAGE ANUAL',  tarjeta:'C4821', cobros:[['2024-10-15', 24990], ['2025-10-15', 29990]] },
+  { key:'FITMAX',     desc:'FITMAX GIMNASIO PROMO',  tarjeta:'D1107', cobros:serie('2026-07-05', 3, 24990) },
+  { key:'PHOTOMAGIC', desc:'PHOTOMAGIC PRO APP',     tarjeta:'C4821', cobros:[['2026-09-24', 1990]] },
+  { key:'MIRADOR',    desc:'EL MIRADOR DIGITAL',     tarjeta:'C4821', cobros:serie('2026-04-20', 6, 3490) },
+  { key:'GAMEVAULT',  desc:'GAMEVAULT PLUS',         tarjeta:'C4821', cobros:serie('2026-04-27', 5, 5990) },
+  { key:'TELENOVA',   desc:'PAT TELENOVA MOVIL',     tarjeta:'D1107', cobros:serie('2026-04-08', 6, 15990) },
+  { key:'LUZVALLE',   desc:'PAT LUZ DEL VALLE',      tarjeta:'D1107', cobros:[['2026-04-18',32450],['2026-05-18',29870],['2026-06-18',27640],['2026-07-18',30120],['2026-08-18',35980],['2026-09-18',38210]] },
+  { key:'PROTEGEYA',  desc:'PROTEGEYA SEGURO CEL',   tarjeta:'C4821', cobros:serie('2026-04-25', 6, 2990) },
+  { key:'DONA*FUNDACION ANIMALIA', desc:'DONA*FUNDACION ANIMALIA', tarjeta:'D1107', cobros:serie('2026-04-10', 6, 5000) }
+];
+
+/* Compras comunes: la detección debe ignorarlas */
+const VARIOS = [
+  ['2026-07-30','SUPERMERCADO SANTA ANA','D1107',40110], ['2026-08-15','SUPERMERCADO SANTA ANA','D1107',61200],
+  ['2026-08-28','SUPERMERCADO SANTA ANA','D1107',23450], ['2026-09-02','SUPERMERCADO SANTA ANA','D1107',45230],
+  ['2026-09-09','SUPERMERCADO SANTA ANA','D1107',38990], ['2026-09-21','SUPERMERCADO SANTA ANA','D1107',52110],
+  ['2026-07-22','ESTACION PETROSUR','C4821',42000], ['2026-08-19','ESTACION PETROSUR','C4821',30000],
+  ['2026-09-06','ESTACION PETROSUR','C4821',35000], ['2026-09-13','RESTAURANT LA PICADA','C4821',18900],
+  ['2026-08-11','FARMACIA VIDA','D1107',12450], ['2026-09-17','FARMACIA VIDA','D1107',8990],
+  ['2026-08-30','MOVIRIDE*VIAJE','C4821',6710], ['2026-09-19','MOVIRIDE*VIAJE','C4821',4350],
+  ['2026-09-19','MOVIRIDE*VIAJE','C4821',5120], ['2026-09-25','MOVIRIDE*VIAJE','C4821',3890],
+  ['2026-09-08','LIBRERIA ANTARES','C4821',15990], ['2026-09-14','CINE PLANETA','C4821',11800]
+];
+
+/* =========================================================
+   Utilidades
+   ========================================================= */
+const $ = s => document.querySelector(s);
+function clp(n){ const s = String(Math.round(Math.abs(n))).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); return (n < 0 ? '-' : '') + '$' + s; }
+function aFecha(iso){ const [y, m, d] = iso.split('-').map(Number); return new Date(Date.UTC(y, m - 1, d)); }
+function aIso(dt){ return dt.toISOString().slice(0, 10); }
+function addDias(iso, n){ const x = aFecha(iso); x.setUTCDate(x.getUTCDate() + n); return aIso(x); }
+function addMeses(iso, n){
+  const x = aFecha(iso), dia = x.getUTCDate();
+  x.setUTCDate(1); x.setUTCMonth(x.getUTCMonth() + n);
+  const ultimo = new Date(Date.UTC(x.getUTCFullYear(), x.getUTCMonth() + 1, 0)).getUTCDate();
+  x.setUTCDate(Math.min(dia, ultimo));
+  return aIso(x);
+}
+function diffDias(a, b){ return Math.round((aFecha(b) - aFecha(a)) / 86400000); }
+function fFecha(iso){ const x = aFecha(iso); return x.getUTCDate() + ' ' + MESES[x.getUTCMonth()] + ' ' + x.getUTCFullYear(); }
+function fCorta(iso){ const x = aFecha(iso); return x.getUTCDate() + ' ' + MESES[x.getUTCMonth()]; }
+function enDias(iso){
+  const d = diffDias(state.hoy, iso);
+  if(d === 0) return 'hoy'; if(d === 1) return 'mañana'; if(d < 0) return 'hace ' + (-d) + ' días';
+  return 'en ' + d + ' días';
+}
+function pct(a, b){ return (((a - b) / b) * 100).toFixed(1).replace('.', ',') + '%'; }
+function esc(t){ return String(t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function uid(){ return Math.random().toString(36).slice(2, 10); }
+function iniciales(n){ return n.split(/\s+/).filter(Boolean).slice(0, 2).map(p => p[0]).join('').toUpperCase(); }
+function tituloDesc(desc){
+  const base = desc.includes('*') ? desc.split('*')[1] : desc;
+  return base.toLowerCase().replace(/\b\p{L}/gu, c => c.toUpperCase());
+}
+function tarjetaTxt(id){ const t = TARJETAS[id]; return t.tipo + ' •••• ' + t.num; }
+const SEV_TXT = { alto:'Riesgo alto', medio:'Riesgo medio', bajo:'Riesgo bajo' };
+const SEV_CLS = { alto:'bad', medio:'warn', bajo:'ok' };
+
+/* =========================================================
+   Estado
+   ========================================================= */
+let state;
+let modal = null;      // { tipo:'detalle'|'anular', id }
+let notifAbierto = false;
+
+function guardar(){ try { localStorage.setItem(CLAVE_STORAGE, JSON.stringify(state)); } catch(e){} }
+function cargar(){
+  try { const raw = localStorage.getItem(CLAVE_STORAGE); if(raw){ const s = JSON.parse(raw); if(s && s.v === 1) return s; } } catch(e){}
+  return null;
+}
+
+function estadoInicial(){
+  const txns = [];
+  HIST.forEach(h => h.cobros.forEach(([f, m]) => txns.push({ id:uid(), fecha:f, key:h.key, desc:h.desc, tarjeta:h.tarjeta, monto:m, estado:'pagado' })));
+  VARIOS.forEach(([f, desc, tarj, m]) => txns.push({ id:uid(), fecha:f, key:desc, desc, tarjeta:tarj, monto:m, estado:'pagado' }));
+  // GameVault subió su precio sin avisar: el 27 sep el banco retuvo el cobro
+  const txGv = { id:uid(), fecha:'2026-09-27', key:'GAMEVAULT', desc:'GAMEVAULT PLUS', tarjeta:'C4821', monto:6990, estado:'retenido' };
+  txns.push(txGv);
+
+  state = {
+    v:1, hoy:HOY_INICIAL, txns, subs:[], retenidos:[], notifs:[], avisados:[],
+    config:{ modo:'estandar', aviso:7, tolerancia:25 },
+    ui:{ tab:'tarjetas', subtab:'escudo', lista:'noconf', mov:'todos' }
+  };
+  sincronizarDeteccion(false);
+  const gv = subPorId('GAMEVAULT');
+  state.retenidos.push({ id:uid(), txId:txGv.id, subId:'GAMEVAULT', fecha:'2026-09-27', monto:6990, previo:5990,
+    tipo:'alza', motivo:'El precio subió de $5.990 a $6.990 (+16,7%) sin aviso previo.', estado:'pendiente' });
+  gv.esperado = 6990;
+  notificar({ fecha:'2026-09-27', nivel:'alerta', subId:'GAMEVAULT', titulo:'Retuvimos un cobro de GameVault Plus',
+    texto:'Intentó cobrar $6.990 (antes $5.990). No lo pagaremos hasta que lo apruebes.' });
+  generarAvisos();
+}
+
+/* =========================================================
+   1) Detección de suscripciones a partir de los movimientos
+   ========================================================= */
+function detectar(txns){
+  const grupos = {};
+  txns.forEach(t => {
+    if(t.estado === 'rechazado' || t.estado === 'bloqueado') return;
+    (grupos[t.key] = grupos[t.key] || []).push(t);
+  });
+  const candidatos = [];
+  for(const key in grupos){
+    const g = grupos[key].slice().sort((a, b) => a.fecha < b.fecha ? -1 : 1);
+    const cat = CATALOGO[key];
+    const ints = [];
+    for(let i = 1; i < g.length; i++) ints.push(diffDias(g[i - 1].fecha, g[i].fecha));
+    const mensual = ints.length > 0 && ints.every(x => x >= 26 && x <= 35);
+    const anual = ints.length > 0 && ints.every(x => x >= 355 && x <= 375);
+    const montos = g.map(t => t.monto);
+    const min = Math.min(...montos), max = Math.max(...montos);
+    const estable = max / min <= 1.05;
+    const variableOk = max / min <= 1.6;
+    const razones = [];
+    let conf = 0, periodo = null;
+
+    if((mensual || anual) && variableOk){
+      periodo = mensual ? 'mensual' : 'anual';
+      const prom = Math.round(ints.reduce((a, b) => a + b, 0) / ints.length);
+      conf = Math.min(0.55 + 0.1 * ints.length, 0.9);
+      razones.push(g.length + ' cobros con un intervalo regular de ~' + prom + ' días (' + periodo + ').');
+      razones.push(estable ? 'Monto estable: ' + (min === max ? clp(min) : clp(min) + ' a ' + clp(max)) + '.'
+                           : 'Monto variable entre ' + clp(min) + ' y ' + clp(max) + ', típico de una cuenta de servicios.');
+    }
+    if(cat){
+      conf = Math.max(Math.min(conf + 0.3, 0.99), cat.trialDias ? 0.88 : 0.7);
+      razones.push('El comercio está en el catálogo de suscripciones del banco: ' + cat.nombre + '.');
+      if(!periodo){
+        periodo = 'mensual';
+        if(cat.trialDias) razones.push('El cargo de ' + clp(g[0].monto) + ' coincide con el precio de prueba del comercio, que luego cobra ' + clp(cat.esperado) + ' al mes.');
+      }
+    }
+    if(conf < 0.6) continue;
+
+    const ult = g[g.length - 1];
+    const pagados = g.filter(t => t.estado === 'pagado');
+    const ultimoMonto = pagados.length ? pagados[pagados.length - 1].monto : ult.monto;
+    const trial = !!(cat && cat.trialDias) && g.length === 1;
+    const proxima = trial ? addDias(g[0].fecha, cat.trialDias) : addMeses(ult.fecha, periodo === 'anual' ? 12 : 1);
+    const esperado = cat && cat.esperado != null ? cat.esperado : ultimoMonto;
+    candidatos.push({
+      id:key, key, desc:ult.desc, tarjeta:ult.tarjeta,
+      nombre:cat ? cat.nombre : tituloDesc(ult.desc),
+      cat:cat ? cat.cat : 'Comercio no catalogado',
+      tipo:cat ? cat.tipo : 'Cobro recurrente',
+      color:cat ? cat.color : '#6b5a4a',
+      periodo, variable:!!(cat && cat.variable), trial,
+      ultimoMonto, esperado, real:cat && cat.real != null ? cat.real : esperado,
+      proximaFecha:proxima, confiable:false, estado:'activa', preaprobado:null, nueva:false,
+      deteccion:{ conf, razones },
+      fuentePrecio:cat ? cat.fuentePrecio : 'Sin información pública del comercio',
+      cancelacion:cat ? cat.cancelacion : 'Desconocido: el comercio no publica un canal de término.',
+      tc:cat ? cat.tc : null
+    });
+  }
+  return candidatos;
+}
+
+function sincronizarDeteccion(marcarNuevas){
+  const nuevas = [];
+  detectar(state.txns).forEach(c => {
+    if(!state.subs.some(s => s.id === c.id)){ c.nueva = marcarNuevas; state.subs.push(c); nuevas.push(c); }
+  });
+  return nuevas;
+}
+
+/* =========================================================
+   2) Motor de decisión: pagar, retener o bloquear un cobro
+   ========================================================= */
+function subPorId(id){ return state.subs.find(s => s.id === id); }
+function historial(s){ return state.txns.filter(t => t.key === s.key).sort((a, b) => a.fecha < b.fecha ? 1 : -1); }
+function promedioVariable(s){
+  const p = historial(s).filter(t => t.estado === 'pagado').slice(0, 6);
+  return p.length ? p.reduce((a, t) => a + t.monto, 0) / p.length : s.ultimoMonto;
+}
+function refMonto(s){ return s.variable ? promedioVariable(s) : s.ultimoMonto; }
+function montoPrevisto(s){ return s.variable ? promedioVariable(s) : s.esperado; }
+
+function decidir(s, monto){
+  if(s.estado === 'anulada') return { estado:'bloqueado', motivo:'La suscripción fue anulada desde la app. El banco rechaza el cobro.' };
+  if(s.confiable) return { estado:'pagado', motivo:'Está en tu lista de confianza: se paga automáticamente.' };
+  if(s.preaprobado && monto <= s.preaprobado) return { estado:'pagado', motivo:'Aprobaste este monto por adelantado (hasta ' + clp(s.preaprobado) + ').' };
+  if(s.trial) return { estado:'retenido', tipo:'primer', motivo:'Es el primer cobro después de una prueba de ' + clp(s.ultimoMonto) + '. Confirma que quieres seguir suscrita.' };
+  const ref = refMonto(s), tol = s.variable ? state.config.tolerancia / 100 : 0;
+  if(monto > ref * (1 + tol) + 0.5){
+    return { estado:'retenido', tipo:'alza', motivo: s.variable
+      ? 'El monto es ' + pct(monto, ref) + ' mayor que tu promedio (' + clp(ref) + '), sobre tu margen de ' + state.config.tolerancia + '%.'
+      : 'El precio subió de ' + clp(ref) + ' a ' + clp(monto) + ' (+' + pct(monto, ref) + ').' };
+  }
+  if(state.config.modo === 'estricto') return { estado:'retenido', tipo:'estricto', motivo:'Modo estricto: todo cobro de una suscripción no confiable necesita tu aprobación.' };
+  return { estado:'pagado', motivo:'Mismo precio que el último cobro que aprobaste.' };
+}
+
+function infoCambio(s){
+  if(s.estado !== 'activa' || !s.proximaFecha) return null;
+  if(s.trial) return { tipo:'primer', chip:'Prueba termina ' + fCorta(s.proximaFecha),
+    texto:'Tu prueba termina el ' + fFecha(s.proximaFecha) + ' y pasará a cobrar ' + clp(s.esperado) + ' al mes.' };
+  const ref = refMonto(s), prev = montoPrevisto(s);
+  const tol = s.variable ? state.config.tolerancia / 100 : 0;
+  if(prev > ref * (1 + tol) + 0.5) return { tipo:'alza', chip:'Sube a ' + clp(prev) + ' (+' + pct(prev, ref) + ')',
+    texto:'Sube de ' + clp(ref) + ' a ' + clp(prev) + ' (+' + pct(prev, ref) + ') el ' + fFecha(s.proximaFecha) + '.' };
+  return null;
+}
+
+function procesarCobros(){
+  const eventos = [];
+  state.subs.forEach(s => {
+    let guard = 0;
+    while(s.proximaFecha && s.proximaFecha <= state.hoy && guard++ < 24){
+      const fecha = s.proximaFecha, monto = s.real;
+      const r = decidir(s, monto);
+      const tx = { id:uid(), fecha, key:s.key, desc:s.desc, tarjeta:s.tarjeta, monto, estado:r.estado };
+      state.txns.push(tx);
+      if(r.estado === 'pagado'){
+        const previo = refMonto(s);
+        s.ultimoMonto = monto; s.trial = false; s.preaprobado = null;
+        if(s.confiable && monto > previo * 1.02 && !s.variable){
+          notificar({ fecha, nivel:'info', subId:s.id, titulo:s.nombre + ' subió su precio', texto:'Se pagaron ' + clp(monto) + ' (antes ' + clp(previo) + ') porque está en tu lista de confianza.' });
+        }
+        eventos.push(s.nombre + ': pagado ' + clp(monto));
+      } else if(r.estado === 'retenido'){
+        state.retenidos.push({ id:uid(), txId:tx.id, subId:s.id, fecha, monto, previo:refMonto(s), tipo:r.tipo, motivo:r.motivo, estado:'pendiente' });
+        notificar({ fecha, nivel:'alerta', subId:s.id, titulo:'Retuvimos un cobro de ' + s.nombre, texto:'Intentó cobrar ' + clp(monto) + '. ' + r.motivo });
+        eventos.push(s.nombre + ': retenido ' + clp(monto));
+      } else {
+        notificar({ fecha, nivel:'ok', subId:s.id, titulo:'Bloqueamos un cobro de ' + s.nombre, texto:'Intentó cobrar ' + clp(monto) + ', pero anulaste esta suscripción.' });
+        eventos.push(s.nombre + ': bloqueado');
+      }
+      s.esperado = s.real;
+      if(s.variable) s.real = Math.round(promedioVariable(s) * (0.9 + Math.random() * 0.25) / 10) * 10;
+      if(s.estado === 'anulada'){ s.proximaFecha = null; break; }
+      s.proximaFecha = addMeses(fecha, s.periodo === 'anual' ? 12 : 1);
+    }
+  });
+  return eventos;
+}
+
+/* 3) Avisos antes del cobro para suscripciones NO confiables */
+function generarAvisos(){
+  state.subs.forEach(s => {
+    if(s.confiable || s.estado !== 'activa' || !s.proximaFecha) return;
+    const d = diffDias(state.hoy, s.proximaFecha);
+    if(d < 0 || d > state.config.aviso) return;
+    const info = infoCambio(s);
+    if(!info) return;
+    const k = 'pre-' + s.id + '-' + s.proximaFecha;
+    if(state.avisados.includes(k)) return;
+    state.avisados.push(k);
+    notificar({ fecha:state.hoy, nivel:'alerta', subId:s.id,
+      titulo: info.tipo === 'primer' ? s.nombre + ': tu prueba se convierte en suscripción' : s.nombre + ' subirá su precio',
+      texto: info.texto + (s.preaprobado ? ' Ya lo aprobaste por adelantado.' : ' Si no lo apruebas, retendremos el cobro.') });
+  });
+}
+
+function notificar(n){ state.notifs.unshift(Object.assign({ id:uid(), leida:false }, n)); }
+
+/* =========================================================
+   Acciones del usuario
+   ========================================================= */
+function refrescar(){ guardar(); render(); }
+
+const ACCIONES = {
+  tab(id){ state.ui.tab = id; notifAbierto = false; refrescar(); window.scrollTo(0, 0); },
+  subtab(id){ state.ui.tab = 'tarjetas'; state.ui.subtab = id; refrescar(); },
+  lista(id){ state.ui.lista = id; refrescar(); },
+  mov(id){ state.ui.mov = id; refrescar(); },
+  confiar(id){
+    const s = subPorId(id); s.confiable = !s.confiable; s.nueva = false;
+    toast(s.confiable ? s.nombre + ' ahora es confiable: sus cobros se pagarán automáticamente.' : s.nombre + ' volvió a No confiables: retendremos sus alzas y cobros nuevos.');
+    refrescar();
+  },
+  detalle(id){ const s = subPorId(id); if(s) s.nueva = false; modal = { tipo:'detalle', id }; notifAbierto = false; refrescar(); },
+  anular(id){ modal = { tipo:'anular', id, volver: modal && modal.tipo === 'detalle' }; render(); },
+  confirmarAnular(id){
+    const s = subPorId(id);
+    s.estado = 'anulada'; s.confiable = false; s.preaprobado = null; s.anuladaEl = state.hoy;
+    s.comprobante = 'AN-' + state.hoy.replace(/-/g, '') + '-' + Math.floor(1000 + Math.random() * 9000);
+    state.retenidos.filter(r => r.subId === id && r.estado === 'pendiente').forEach(r => {
+      r.estado = 'rechazado'; const tx = state.txns.find(t => t.id === r.txId); if(tx) tx.estado = 'rechazado';
+    });
+    notificar({ fecha:state.hoy, nivel:'ok', subId:id, titulo:s.nombre + ' anulada', texto:'Comprobante ' + s.comprobante + '. Bloquearemos cualquier cobro futuro y enviamos la solicitud de término al comercio.' });
+    modal = null; toast(s.nombre + ' anulada. Comprobante ' + s.comprobante + '.'); refrescar();
+  },
+  aprobar(id){
+    const r = state.retenidos.find(x => x.id === id), s = subPorId(r.subId);
+    r.estado = 'aprobado'; const tx = state.txns.find(t => t.id === r.txId); if(tx) tx.estado = 'pagado';
+    s.ultimoMonto = r.monto; s.trial = false; s.preaprobado = null;
+    toast('Cobro aprobado: pagamos ' + clp(r.monto) + ' a ' + s.nombre + '.'); refrescar();
+  },
+  rechazar(id){
+    const r = state.retenidos.find(x => x.id === id), s = subPorId(r.subId);
+    r.estado = 'rechazado'; const tx = state.txns.find(t => t.id === r.txId); if(tx) tx.estado = 'rechazado';
+    toast('Rechazaste el cobro de ' + clp(r.monto) + '. ' + s.nombre + ' no recibió el pago.'); refrescar();
+  },
+  preaprobar(id){
+    const s = subPorId(id); s.preaprobado = s.esperado;
+    toast('Aprobaste por adelantado ' + clp(s.esperado) + ' para ' + s.nombre + '.'); refrescar();
+  },
+  despreaprobar(id){ const s = subPorId(id); s.preaprobado = null; toast('Quitamos la aprobación por adelantado de ' + s.nombre + '.'); refrescar(); },
+  cerrar(){ if(modal && modal.tipo === 'anular' && modal.volver){ modal = { tipo:'detalle', id:modal.id }; } else modal = null; render(); },
+  bell(){ notifAbierto = !notifAbierto; render(); },
+  leerTodo(){ state.notifs.forEach(n => n.leida = true); refrescar(); },
+  notif(id){
+    const n = state.notifs.find(x => x.id === id); n.leida = true; notifAbierto = false;
+    if(n.subId && subPorId(n.subId)){ state.ui.tab = 'tarjetas'; state.ui.subtab = 'escudo'; modal = { tipo:'detalle', id:n.subId }; }
+    refrescar();
+  },
+  demo(){ const d = $('#demo'); const open = d.dataset.open !== 'true'; d.dataset.open = open; $('#demo-body').hidden = !open; },
+  avanzar(){ avanzarHasta(addDias(state.hoy, 1)); },
+  proximo(){
+    const fechas = state.subs.filter(s => s.proximaFecha && s.proximaFecha > state.hoy).map(s => s.proximaFecha).sort();
+    avanzarHasta(fechas[0] || addDias(state.hoy, 1));
+  },
+  oculta(){
+    if(subPorId('VPNSHIELD')){ toast('La compra de VPN Shield ya está simulada.'); return; }
+    state.txns.push({ id:uid(), fecha:state.hoy, key:'VPNSHIELD', desc:'VPNSHIELD*ACCESO 3 DIAS', tarjeta:'C4821', monto:990, estado:'pagado' });
+    const nuevas = sincronizarDeteccion(true);
+    nuevas.forEach(s => notificar({ fecha:state.hoy, nivel:'alerta', subId:s.id, titulo:'Detectamos una suscripción en una compra',
+      texto:'Tu compra de ' + clp(990) + ' en ' + s.nombre + ' activa un plan de ' + clp(s.esperado) + ' al mes desde el ' + fFecha(s.proximaFecha) + '.' }));
+    generarAvisos();
+    state.ui.tab = 'tarjetas'; state.ui.subtab = 'escudo'; state.ui.lista = 'noconf';
+    toast('Compra simulada: detectamos que VPN Shield es una suscripción.'); refrescar();
+  },
+  reset(){ try { localStorage.removeItem(CLAVE_STORAGE); } catch(e){} modal = null; notifAbierto = false; estadoInicial(); toast('Demo reiniciada al 29 sep 2026.'); refrescar(); }
+};
+
+function avanzarHasta(fecha){
+  const eventos = [];
+  let guard = 0;
+  while(state.hoy < fecha && guard++ < 400){
+    state.hoy = addDias(state.hoy, 1);
+    eventos.push(...procesarCobros());
+    generarAvisos();
+  }
+  toast(fFecha(state.hoy) + (eventos.length ? ' · ' + eventos.join(' · ') : ' · sin cobros hoy'));
+  refrescar();
+}
+
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]');
+  if(el){ const fn = ACCIONES[el.dataset.act]; if(fn){ e.preventDefault(); fn(el.dataset.id, el); } return; }
+  if(e.target.classList.contains('overlay')) ACCIONES.cerrar();
+  if(notifAbierto && !e.target.closest('.notif-pop')){ notifAbierto = false; render(); }
+});
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape'){ if(modal) ACCIONES.cerrar(); else if(notifAbierto){ notifAbierto = false; render(); } }
+});
+document.addEventListener('change', e => {
+  const t = e.target;
+  if(t.name === 'modo') state.config.modo = t.value;
+  else if(t.name === 'aviso'){ state.config.aviso = Number(t.value); generarAvisos(); }
+  else if(t.name === 'tolerancia') state.config.tolerancia = Number(t.value);
+  else return;
+  toast('Configuración guardada.'); refrescar();
+});
+
+let toastTimer;
+function toast(msg){
+  const t = $('#toast'); t.textContent = msg; t.hidden = false;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 4200);
+}
+
+/* =========================================================
+   Vistas
+   ========================================================= */
+const ICON = {
+  escudo:'<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg>',
+  x:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  check:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>'
+};
+
+function avatar(s, size){ return '<div class="m-av" style="background:' + s.color + (size ? ';width:' + size + 'px;height:' + size + 'px' : '') + '">' + esc(iniciales(s.nombre)) + '</div>'; }
+function pendientes(){ return state.retenidos.filter(r => r.estado === 'pendiente'); }
+function mensualEq(s, m){ return s.periodo === 'anual' ? m / 12 : m; }
+function estadoChip(e){
+  const map = { pagado:['ok','Pagado'], retenido:['bad','Retenido'], rechazado:['','Rechazado'], bloqueado:['info','Bloqueado'] };
+  const [c, t] = map[e] || ['', e];
+  return '<span class="chip ' + c + '">' + t + '</span>';
+}
+
+function vistaInicio(){
+  const pend = pendientes();
+  const usado = state.txns.filter(t => t.tarjeta === 'C4821' && t.estado === 'pagado' && t.fecha >= '2026-09-01').reduce((a, t) => a + t.monto, 0);
+  const recientes = state.txns.filter(t => t.fecha <= state.hoy).sort((a, b) => a.fecha < b.fecha ? 1 : -1).slice(0, 6);
+  const activas = state.subs.filter(s => s.estado === 'activa').length;
+  return `
+  <div class="page-head"><div><p class="eyebrow">${fFecha(state.hoy)}</p><h1>Hola, Camila</h1></div></div>
+  <div class="acc-grid">
+    <div class="acc"><span class="eyebrow">Cuenta Corriente · 00-123-45678-9</span><span class="big num">${clp(1245380)}</span><span class="muted small">Saldo disponible</span></div>
+    <div class="acc"><span class="eyebrow">Cuenta Vista · 00-987-65432-1</span><span class="big num">${clp(184900)}</span><span class="muted small">Saldo disponible</span></div>
+    <div class="acc"><span class="eyebrow">Visa Signature •••• 4821</span><span class="big num">${clp(TARJETAS.C4821.cupo - usado)}</span><span class="muted small">Cupo disponible de ${clp(TARJETAS.C4821.cupo)}</span></div>
+  </div>
+  <div class="promo">
+    <div class="shield">${ICON.escudo}</div>
+    <div class="min0">
+      <h3>${pend.length ? 'Tienes ' + pend.length + (pend.length === 1 ? ' cobro retenido' : ' cobros retenidos') + ' esperando tu aprobación' : 'Escudo de Suscripciones activo'}</h3>
+      <p class="muted small" style="margin-top:4px">Revisamos ${activas} suscripciones y cobros recurrentes de tus tarjetas. Ninguna alza de precio se paga sin tu permiso.</p>
+    </div>
+    <div class="btns"><button class="btn btn-primary" data-act="subtab" data-id="escudo">Revisar suscripciones</button></div>
+  </div>
+  <section class="panel">
+    <div class="sec-head"><div><p class="eyebrow">Actividad</p><h3>Últimos movimientos</h3></div><button class="btn btn-sm" data-act="subtab" data-id="movimientos">Ver todos</button></div>
+    <div class="hist-list">${recientes.map(t => `<div><span class="min0">${esc(t.desc)} <span class="muted small">· ${fCorta(t.fecha)}</span></span><span class="num strong">${clp(t.monto)} ${t.estado !== 'pagado' ? estadoChip(t.estado) : ''}</span></div>`).join('')}</div>
+  </section>`;
+}
+
+function vistaCuentas(){
+  return `
+  <div class="page-head"><div><p class="eyebrow">Cuentas</p><h1>Mis cuentas</h1></div></div>
+  <div class="acc-grid">
+    <div class="acc"><span class="eyebrow">Cuenta Corriente</span><span class="big num">${clp(1245380)}</span><span class="muted small">N° 00-123-45678-9 · Línea de crédito ${clp(500000)}</span></div>
+    <div class="acc"><span class="eyebrow">Cuenta Vista</span><span class="big num">${clp(184900)}</span><span class="muted small">N° 00-987-65432-1</span></div>
+  </div>
+  <section class="panel"><p class="muted">Esta sección no forma parte del prototipo. Para probar la solución, ve a <button class="btn-link" data-act="subtab" data-id="escudo">Tarjetas → Suscripciones</button>.</p></section>`;
+}
+
+function vistaFuera(nombre){
+  return `
+  <div class="page-head"><div><p class="eyebrow">${nombre}</p><h1>${nombre}</h1></div></div>
+  <section class="panel"><p class="muted">Esta sección no forma parte del prototipo. Para probar la solución, ve a <button class="btn-link" data-act="subtab" data-id="escudo">Tarjetas → Suscripciones</button>.</p></section>`;
+}
+
+function vistaTarjetas(){
+  const pend = pendientes().length;
+  const usado = state.txns.filter(t => t.tarjeta === 'C4821' && t.estado === 'pagado' && t.fecha >= '2026-09-01').reduce((a, t) => a + t.monto, 0);
+  const sub = state.ui.subtab;
+  const tabs = [['escudo', 'Suscripciones', pend ? '<span class="new-tag">' + pend + ' por aprobar</span>' : '<span class="new-tag">Nuevo</span>'], ['movimientos', 'Movimientos', ''], ['config', 'Configuración del Escudo', '']];
+  let cuerpo = sub === 'movimientos' ? vistaMovimientos() : sub === 'config' ? vistaConfig() : vistaEscudo();
+  return `
+  <div class="page-head"><div><p class="eyebrow">Tarjetas</p><h1>Mis tarjetas</h1></div></div>
+  <div class="cards-strip">
+    <div class="bank-card credit">
+      <div class="t"><span>Visa Signature · Crédito</span><span class="chip-el"></span></div>
+      <div class="n num">•••• •••• •••• 4821</div>
+      <div class="b"><span>Cupo disponible<strong class="num">${clp(TARJETAS.C4821.cupo - usado)}</strong></span><span>Facturado sep<strong class="num">${clp(usado)}</strong></span></div>
+    </div>
+    <div class="bank-card debit">
+      <div class="t"><span>Débito · Cuenta Corriente</span><span class="chip-el"></span></div>
+      <div class="n num">•••• •••• •••• 1107</div>
+      <div class="b"><span>Saldo cuenta<strong class="num">${clp(1245380)}</strong></span><span>Titular<strong>Camila Rojas</strong></span></div>
+    </div>
+  </div>
+  <div class="subnav" role="tablist">${tabs.map(([id, t, extra]) => `<button role="tab" aria-selected="${sub === id}" data-act="subtab" data-id="${id}">${t} ${extra}</button>`).join('')}</div>
+  ${cuerpo}`;
+}
+
+function vistaEscudo(){
+  const cfg = state.config;
+  const activas = state.subs.filter(s => s.estado === 'activa');
+  const pend = pendientes();
+  const mensual = activas.reduce((a, s) => a + mensualEq(s, refMonto(s)), 0);
+  const mensualProx = activas.reduce((a, s) => a + mensualEq(s, s.trial ? s.esperado : montoPrevisto(s)), 0);
+  const prox7 = activas.filter(s => { const d = diffDias(state.hoy, s.proximaFecha); return d >= 0 && d <= 7; });
+  const rech = state.retenidos.filter(r => r.estado === 'rechazado');
+  const bloq = state.txns.filter(t => t.estado === 'bloqueado');
+  const evitado = rech.reduce((a, r) => a + r.monto, 0) + bloq.reduce((a, t) => a + t.monto, 0);
+  const nAnul = state.subs.filter(s => s.estado === 'anulada').length;
+
+  const avisos = activas.filter(s => !s.confiable).map(s => ({ s, info:infoCambio(s) })).filter(x => x.info)
+    .filter(x => !pend.some(r => r.subId === x.s.id && r.fecha === x.s.proximaFecha))
+    .sort((a, b) => a.s.proximaFecha < b.s.proximaFecha ? -1 : 1);
+
+  const lista = state.ui.lista;
+  const grupos = {
+    noconf: state.subs.filter(s => s.estado === 'activa' && !s.confiable),
+    conf: state.subs.filter(s => s.estado === 'activa' && s.confiable),
+    anul: state.subs.filter(s => s.estado === 'anulada')
+  };
+  const notas = {
+    noconf:'Todo cobro recurrente que detectamos entra aquí automáticamente. Si una de estas suscripciones sube su precio o cobra por primera vez después de una prueba, retenemos el cobro hasta que lo apruebes.',
+    conf:'Las marcaste como confiables: se pagan automáticamente, aunque cambien de precio. Si suben, te avisamos después del pago.',
+    anul:'Anuladas desde la app. El banco rechaza cualquier intento de cobro de estos comercios.'
+  };
+  const orden = arr => arr.slice().sort((a, b) => {
+    const pa = pend.some(r => r.subId === a.id) ? 0 : 1, pb = pend.some(r => r.subId === b.id) ? 0 : 1;
+    if(pa !== pb) return pa - pb;
+    return (a.proximaFecha || '9') < (b.proximaFecha || '9') ? -1 : 1;
+  });
+
+  return `
+  <section class="escudo-head">
+    <div class="escudo-id">
+      <div class="shield">${ICON.escudo}</div>
+      <div><h2>Escudo de Suscripciones</h2>
+      <p class="muted">Encontramos ${state.subs.length} suscripciones y cobros recurrentes en tus tarjetas. Cada uno entra como <strong>no confiable</strong> hasta que tú lo marques como confiable, y ninguna alza se paga sin tu permiso.</p></div>
+    </div>
+    <button class="mode-pill" data-act="subtab" data-id="config"><span class="led"></span>Modo ${cfg.modo === 'estricto' ? 'estricto' : 'estándar'} · aviso ${cfg.aviso} días antes</button>
+  </section>
+
+  <div class="kpis">
+    <div class="kpi"><span class="l">Gasto recurrente mensual</span><span class="v">${clp(mensual)}</span><span class="s">${mensualProx > mensual + 1 ? 'Con alzas previstas: ' + clp(mensualProx) : 'Sin alzas previstas'}</span></div>
+    <div class="kpi ${pend.length ? 'crit' : ''}"><span class="l">Cobros retenidos</span><span class="v">${pend.length}</span><span class="s">${pend.length ? clp(pend.reduce((a, r) => a + r.monto, 0)) + ' esperan tu aprobación' : 'Nada pendiente'}</span></div>
+    <div class="kpi"><span class="l">Cobros en 7 días</span><span class="v">${prox7.length}</span><span class="s">${clp(prox7.reduce((a, s) => a + (s.variable ? promedioVariable(s) : s.esperado), 0))} previstos</span></div>
+    <div class="kpi"><span class="l">Cobros no deseados evitados</span><span class="v">${clp(evitado)}</span><span class="s">${rech.length} rechazados · ${nAnul} anuladas</span></div>
+  </div>
+
+  <section class="panel">
+    <div class="sec-head"><div><p class="eyebrow">Requiere tu aprobación</p><h3>Cobros retenidos</h3></div><p class="muted small">No los pagamos hasta que decidas.</p></div>
+    ${pend.length ? `<div class="held-list">${pend.map(r => { const s = subPorId(r.subId); return `
+      <article class="held">
+        ${avatar(s)}
+        <div class="min0">
+          <div class="row-title">${esc(s.nombre)} <span class="chip bad">${r.tipo === 'primer' ? 'Primer cobro tras prueba' : r.tipo === 'estricto' ? 'Modo estricto' : 'Alza de precio'}</span></div>
+          <p>Intentó cobrar <strong class="num">${clp(r.monto)}</strong> el ${fFecha(r.fecha)}${r.tipo !== 'primer' ? ' · antes pagabas ' + clp(r.previo) : ''}.</p>
+          <p class="small muted">${esc(r.motivo)} · ${tarjetaTxt(s.tarjeta)}</p>
+        </div>
+        <div class="btns">
+          <button class="btn btn-primary" data-act="aprobar" data-id="${r.id}">Aprobar cobro</button>
+          <button class="btn" data-act="rechazar" data-id="${r.id}">Rechazar</button>
+          <button class="btn btn-danger" data-act="anular" data-id="${s.id}">Anular suscripción</button>
+        </div>
+      </article>`; }).join('')}</div>` : `<div class="calm">${ICON.check} No hay cobros retenidos. Todo lo que se ha cobrado lo autorizaste.</div>`}
+  </section>
+
+  <section class="panel">
+    <div class="sec-head"><div><p class="eyebrow">Antes del próximo cobro</p><h3>Alzas y pruebas por vencer</h3></div><p class="muted small">Solo suscripciones no confiables.</p></div>
+    ${avisos.length ? `<div class="aviso-list">${avisos.map(({ s, info }) => `
+      <article class="aviso">
+        ${avatar(s)}
+        <div class="min0">
+          <div class="row-title"><button class="btn-link" data-act="detalle" data-id="${s.id}">${esc(s.nombre)}</button>
+            <span class="chip ${info.tipo === 'primer' ? 'warn' : 'bad'}">${info.tipo === 'primer' ? 'Era una prueba' : 'Alza de precio'}</span>
+            ${s.preaprobado ? '<span class="chip ok">Aprobado por adelantado</span>' : ''}</div>
+          <p>${esc(info.texto)} <span class="muted">(${enDias(s.proximaFecha)})</span></p>
+          <p class="small muted">Fuente: ${esc(s.fuentePrecio)}. ${s.preaprobado ? 'Se pagará automáticamente.' : 'Si no haces nada, retendremos el cobro hasta que lo apruebes.'}</p>
+        </div>
+        <div class="btns">
+          ${s.preaprobado ? `<button class="btn" data-act="despreaprobar" data-id="${s.id}">Deshacer aprobación</button>` : `<button class="btn" data-act="preaprobar" data-id="${s.id}">Aceptar ${clp(s.esperado)}</button>`}
+          <button class="btn btn-danger" data-act="anular" data-id="${s.id}">Anular</button>
+        </div>
+      </article>`).join('')}</div>` : `<div class="calm">${ICON.check} Ninguna suscripción no confiable tiene alzas previstas.</div>`}
+  </section>
+
+  <section class="panel">
+    <div class="sec-head">
+      <div><p class="eyebrow">Tus cobros recurrentes</p><h3>Suscripciones y gastos recurrentes</h3></div>
+      <div class="seg" role="tablist">
+        <button role="tab" aria-selected="${lista === 'noconf'}" data-act="lista" data-id="noconf">No confiables <span class="n">${grupos.noconf.length}</span></button>
+        <button role="tab" aria-selected="${lista === 'conf'}" data-act="lista" data-id="conf">Confiables <span class="n">${grupos.conf.length}</span></button>
+        <button role="tab" aria-selected="${lista === 'anul'}" data-act="lista" data-id="anul">Anuladas <span class="n">${grupos.anul.length}</span></button>
+      </div>
+    </div>
+    <p class="list-note">${notas[lista]}</p>
+    <div class="sub-list">${grupos[lista].length ? orden(grupos[lista]).map(filaSub).join('') : `<div class="empty">${lista === 'conf' ? 'Aún no marcas ninguna suscripción como confiable. Activa el interruptor “Confiable” en las que conoces y aceptas.' : lista === 'anul' ? 'No has anulado suscripciones.' : 'No quedan suscripciones sin revisar.'}</div>`}</div>
+    <details class="how">
+      <summary>¿Cómo decide el Escudo si paga o retiene un cobro?</summary>
+      <ol>
+        <li>Si anulaste la suscripción, el banco <strong>bloquea</strong> el cobro.</li>
+        <li>Si es <strong>confiable</strong>, se paga automáticamente.</li>
+        <li>Si aprobaste el nuevo monto por adelantado, se paga.</li>
+        <li>Si es el primer cobro después de una prueba, se <strong>retiene</strong>: puede que no supieras que era una suscripción.</li>
+        <li>Si el monto es mayor que el último que aprobaste, se <strong>retiene</strong> (en cuentas variables, si supera tu promedio más el margen de ${cfg.tolerancia}%).</li>
+        <li>En modo estricto, todo cobro de una suscripción no confiable se retiene. En modo estándar, si el precio no cambió, se paga.</li>
+      </ol>
+    </details>
+  </section>`;
+}
+
+function filaSub(s){
+  const pend = pendientes().find(r => r.subId === s.id);
+  const info = infoCambio(s);
+  const chips = [];
+  if(s.nueva) chips.push('<span class="chip info">Nueva</span>');
+  if(pend) chips.push('<span class="chip bad">Cobro retenido</span>');
+  if(info) chips.push('<span class="chip ' + (info.tipo === 'primer' ? 'warn' : 'bad') + '">' + esc(info.chip) + '</span>');
+  if(s.tc) chips.push('<span class="chip ' + SEV_CLS[s.tc.riesgo] + '">Letra chica: riesgo ' + s.tc.riesgo + '</span>');
+  else chips.push('<span class="chip">Sin T&amp;C disponibles</span>');
+  const monto = s.variable ? '~' + clp(promedioVariable(s)) : clp(s.trial ? s.esperado : refMonto(s));
+  const periodoTxt = s.variable ? 'promedio mensual' : s.trial ? 'al mes tras la prueba' : s.periodo === 'anual' ? 'al año' : 'al mes';
+  if(s.estado === 'anulada'){
+    return `
+    <article class="sub-row">
+      ${avatar(s)}
+      <div class="c-info min0"><div class="row-title"><button class="btn-link" data-act="detalle" data-id="${s.id}">${esc(s.nombre)}</button><span class="chip info">Cobros bloqueados</span></div>
+        <p class="muted small">${esc(s.tipo)} · ${esc(s.cat)} · ${tarjetaTxt(s.tarjeta)}</p></div>
+      <div class="c-monto"><div class="amt">${clp(refMonto(s))}</div><div class="muted small">${s.periodo === 'anual' ? 'al año' : 'al mes'}</div></div>
+      <div class="c-fecha"><div class="small muted">Anulada</div><div class="strong num">${fCorta(s.anuladaEl)}</div><div class="muted small">${esc(s.comprobante)}</div></div>
+      <div class="c-acc"><button class="btn btn-sm" data-act="detalle" data-id="${s.id}">Ver detalle</button></div>
+    </article>`;
+  }
+  return `
+  <article class="sub-row">
+    ${avatar(s)}
+    <div class="c-info min0">
+      <div class="row-title"><button class="btn-link" data-act="detalle" data-id="${s.id}">${esc(s.nombre)}</button></div>
+      <p class="muted small">${esc(s.tipo)} · ${esc(s.cat)} · ${tarjetaTxt(s.tarjeta)}</p>
+      <div class="chips">${chips.join('')}</div>
+    </div>
+    <div class="c-monto"><div class="amt">${monto}</div><div class="muted small">${periodoTxt}</div></div>
+    <div class="c-fecha"><div class="small muted">Próximo cobro</div><div class="strong num">${s.proximaFecha ? fCorta(s.proximaFecha) : '—'}</div><div class="muted small">${s.proximaFecha ? enDias(s.proximaFecha) : ''}</div></div>
+    <div class="c-acc">
+      <button class="switch" role="switch" aria-checked="${s.confiable}" data-act="confiar" data-id="${s.id}" aria-label="Marcar ${esc(s.nombre)} como confiable"><span class="track"></span>Confiable</button>
+      <button class="btn btn-sm" data-act="detalle" data-id="${s.id}">Detalle</button>
+      <button class="btn btn-sm btn-danger" data-act="anular" data-id="${s.id}">Anular</button>
+    </div>
+  </article>`;
+}
+
+function vistaMovimientos(){
+  const f = state.ui.mov;
+  const keysSubs = new Set(state.subs.map(s => s.key));
+  let txs = state.txns.filter(t => t.fecha <= state.hoy && t.fecha >= '2026-04-01').sort((a, b) => a.fecha < b.fecha ? 1 : -1);
+  if(f === 'recurrentes') txs = txs.filter(t => keysSubs.has(t.key));
+  if(f === 'retenidos') txs = txs.filter(t => t.estado !== 'pagado');
+  const nombre = t => { const s = state.subs.find(x => x.key === t.key); return s ? s : null; };
+  return `
+  <section class="panel">
+    <div class="sec-head">
+      <div><p class="eyebrow">Tarjetas de crédito y débito</p><h3>Movimientos</h3></div>
+      <div class="filters">
+        ${[['todos', 'Todos'], ['recurrentes', 'Solo recurrentes'], ['retenidos', 'Retenidos y rechazados']].map(([id, t]) => `<button class="btn btn-sm ${f === id ? 'btn-primary' : ''}" data-act="mov" data-id="${id}">${t}</button>`).join('')}
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Fecha</th><th>Comercio</th><th>Tarjeta</th><th>Detección</th><th class="r">Monto</th><th>Estado</th></tr></thead>
+        <tbody>${txs.map(t => { const s = nombre(t); return `
+          <tr>
+            <td class="num">${fCorta(t.fecha)}</td>
+            <td><strong>${esc(t.desc)}</strong>${s ? `<div class="small muted">${esc(s.nombre)}</div>` : ''}</td>
+            <td class="muted small">${tarjetaTxt(t.tarjeta)}</td>
+            <td>${s ? `<button class="chip ${s.confiable ? 'ok' : s.estado === 'anulada' ? 'info' : 'warn'}" style="border:0" data-act="detalle" data-id="${s.id}">${s.estado === 'anulada' ? 'Anulada' : s.confiable ? 'Confiable' : 'No confiable'}</button>` : '<span class="muted small">Compra única</span>'}</td>
+            <td class="r num strong">${clp(t.monto)}</td>
+            <td>${estadoChip(t.estado)}</td>
+          </tr>`; }).join('')}</tbody>
+      </table>
+    </div>
+  </section>`;
+}
+
+function vistaConfig(){
+  const c = state.config;
+  return `
+  <section class="panel">
+    <div><p class="eyebrow">Configuración del Escudo</p><h3>Qué cobros retenemos</h3></div>
+    <div class="cfg-group">
+      <label class="opt"><input type="radio" name="modo" id="modo-estandar" value="estandar" ${c.modo === 'estandar' ? 'checked' : ''}>
+        <span><strong>Estándar (recomendado)</strong><p>Retenemos los cobros de suscripciones no confiables solo si suben de precio o si son el primer cobro después de una prueba.</p></span></label>
+      <label class="opt"><input type="radio" name="modo" id="modo-estricto" value="estricto" ${c.modo === 'estricto' ? 'checked' : ''}>
+        <span><strong>Estricto</strong><p>Retenemos todo cobro de una suscripción no confiable, aunque el precio no cambie. Las confiables se siguen pagando solas.</p></span></label>
+    </div>
+  </section>
+  <section class="panel">
+    <div><p class="eyebrow">Avisos</p><h3>Con cuánta anticipación te avisamos de un alza</h3></div>
+    <div class="radio-row">${[3, 5, 7, 14].map(d => `<label><input type="radio" name="aviso" id="aviso-${d}" value="${d}" ${c.aviso === d ? 'checked' : ''}>${d} días antes</label>`).join('')}</div>
+  </section>
+  <section class="panel">
+    <div><p class="eyebrow">Cuentas de monto variable</p><h3>Margen sobre tu promedio antes de retener</h3></div>
+    <p class="muted small">Aplica a cobros como luz o agua, que cambian cada mes según el consumo.</p>
+    <div class="radio-row">${[10, 25, 40].map(t => `<label><input type="radio" name="tolerancia" id="tol-${t}" value="${t}" ${c.tolerancia === t ? 'checked' : ''}>${t}%</label>`).join('')}</div>
+  </section>`;
+}
+
+/* ---------- Hoja de detalle ---------- */
+function modalDetalle(s){
+  const hist = historial(s);
+  const pend = pendientes().find(r => r.subId === s.id);
+  const prev = s.trial ? s.esperado : montoPrevisto(s);
+  const dec = s.proximaFecha ? decidir(s, prev) : null;
+  const barras = hist.slice(0, 8).reverse();
+  const maxM = Math.max(...barras.map(t => t.monto), 1);
+  const verdict = !dec ? '' : dec.estado === 'pagado'
+    ? `<div class="verdict pay">Se pagará automáticamente. ${esc(dec.motivo)}</div>`
+    : dec.estado === 'retenido' ? `<div class="verdict hold">Lo retendremos hasta que lo apruebes. ${esc(dec.motivo)}</div>`
+    : `<div class="verdict block">${esc(dec.motivo)}</div>`;
+  const tc = s.tc;
+  return `
+  <div class="overlay sheet" role="dialog" aria-modal="true" aria-label="Detalle de ${esc(s.nombre)}">
+    <div class="modal">
+      <div class="sheet-head">
+        ${avatar(s, 52)}
+        <div class="min0"><h2>${esc(s.nombre)}</h2><p class="muted small">${esc(s.tipo)} · ${esc(s.cat)} · ${tarjetaTxt(s.tarjeta)}</p></div>
+        <button class="x" data-act="cerrar" aria-label="Cerrar">${ICON.x}</button>
+      </div>
+
+      ${s.estado === 'anulada' ? `<div class="note">Anulaste esta suscripción el ${fFecha(s.anuladaEl)}. Comprobante <strong>${esc(s.comprobante)}</strong>. El banco rechaza cualquier cobro de este comercio.</div>` : `
+      <div class="trust-box">
+        <div class="min0"><strong>${s.confiable ? 'En tu lista de confianza' : 'No confiable'}</strong>
+          <p class="muted small">${s.confiable ? 'Sus cobros se pagan solos, aunque cambie el precio.' : 'Retenemos sus alzas y cobros nuevos hasta que los apruebes.'}</p></div>
+        <button class="switch" role="switch" aria-checked="${s.confiable}" data-act="confiar" data-id="${s.id}"><span class="track"></span>Confiable</button>
+      </div>`}
+
+      ${pend ? `<div class="held" style="grid-template-columns:minmax(0,1fr)"><div><strong>Cobro retenido de ${clp(pend.monto)}</strong><p class="small">${esc(pend.motivo)}</p></div>
+        <div class="btns"><button class="btn btn-primary" data-act="aprobar" data-id="${pend.id}">Aprobar cobro</button><button class="btn" data-act="rechazar" data-id="${pend.id}">Rechazar</button></div></div>` : ''}
+
+      ${s.proximaFecha && s.estado === 'activa' ? `
+      <section class="sheet-sec">
+        <h4>Próximo cobro</h4>
+        <div class="facts">
+          <div class="fact"><div class="l">Fecha</div><div class="v">${fFecha(s.proximaFecha)} <span class="muted small">(${enDias(s.proximaFecha)})</span></div></div>
+          <div class="fact"><div class="l">Monto previsto</div><div class="v">${s.variable ? '~' : ''}${clp(prev)}</div></div>
+          <div class="fact"><div class="l">Último monto aprobado</div><div class="v">${clp(s.variable ? promedioVariable(s) : s.ultimoMonto)}${s.variable ? ' <span class="muted small">prom.</span>' : ''}</div></div>
+          <div class="fact"><div class="l">Frecuencia</div><div class="v">${s.periodo === 'anual' ? 'Anual' : 'Mensual'}</div></div>
+        </div>
+        ${verdict}
+        <p class="small muted">Fuente del precio previsto: ${esc(s.fuentePrecio)}.</p>
+      </section>` : ''}
+
+      <section class="sheet-sec">
+        <h4>Letra chica ${tc ? `<span class="chip ${SEV_CLS[tc.riesgo]}">${SEV_TXT[tc.riesgo]}</span>` : ''}</h4>
+        ${tc ? `
+          <p class="small muted">Analizamos: ${esc(tc.version)}</p>
+          <p class="resumen">${esc(tc.resumen)}</p>
+          <div class="clauses">${tc.clausulas.map(c => `
+            <div class="clause"><div class="h"><span>${esc(c.titulo)}</span><span class="chip ${SEV_CLS[c.sev]}">${c.sev}</span></div>
+            <blockquote>“${esc(c.cita)}”</blockquote><span class="ref">${esc(c.ref)}</span></div>`).join('')}</div>`
+        : `<div class="note warn">No encontramos términos y condiciones públicos para este comercio. Lo tratamos como no confiable hasta que lo revises.</div>`}
+        <div class="fact"><div class="l">Cómo se cancela normalmente</div><div class="small">${esc(s.cancelacion)}</div></div>
+      </section>
+
+      <section class="sheet-sec">
+        <h4>Cómo la detectamos</h4>
+        <div style="display:flex;justify-content:space-between;font-size:.85rem"><span class="muted">Confianza de la detección</span><strong class="num">${Math.round(s.deteccion.conf * 100)}%</strong></div>
+        <div class="conf"><span style="width:${Math.round(s.deteccion.conf * 100)}%"></span></div>
+        <ul class="reasons">${s.deteccion.razones.map(r => `<li>${esc(r)}</li>`).join('')}</ul>
+      </section>
+
+      <section class="sheet-sec">
+        <h4>Historial de cobros</h4>
+        <div class="bars" aria-hidden="true">${barras.map(t => `<div class="col"><span class="val">${clp(t.monto)}</span><div class="bar ${t.estado}" style="height:${Math.max(6, t.monto / maxM * 70)}%"></div><span class="lbl">${fCorta(t.fecha)}</span></div>`).join('')}</div>
+        <div class="hist-list">${hist.map(t => `<div><span class="num">${fFecha(t.fecha)}</span><span class="num strong">${clp(t.monto)} ${estadoChip(t.estado)}</span></div>`).join('')}</div>
+      </section>
+
+      <div class="sheet-foot">
+        ${s.estado === 'activa' ? `<button class="btn btn-danger-solid" data-act="anular" data-id="${s.id}">Anular suscripción</button>` : ''}
+        <button class="btn" data-act="cerrar">Cerrar</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function modalAnular(s){
+  const tc = s.tc;
+  const permanencia = tc && tc.clausulas.some(c => /permanencia/i.test(c.titulo));
+  return `
+  <div class="overlay" role="dialog" aria-modal="true" aria-label="Anular ${esc(s.nombre)}">
+    <div class="modal">
+      <div class="sheet-head">${avatar(s)}<div class="min0"><h3>¿Anular ${esc(s.nombre)}?</h3><p class="muted small">${clp(s.trial ? s.esperado : refMonto(s))} ${s.periodo === 'anual' ? 'al año' : 'al mes'} · ${tarjetaTxt(s.tarjeta)}</p></div></div>
+      <p>Desde hoy, el banco rechazará cualquier cobro de ${esc(s.nombre)} en tu tarjeta y enviará al comercio tu solicitud de término.</p>
+      <div class="note">Normalmente se cancela así: ${esc(s.cancelacion)} Desde aquí lo haces en un paso.</div>
+      ${permanencia ? `<div class="note warn">Sus términos incluyen una multa por término anticipado. El banco bloquea los cobros, pero el comercio podría reclamarla por otra vía.</div>` : ''}
+      <div class="btns" style="justify-content:flex-end">
+        <button class="btn" data-act="cerrar">Volver</button>
+        <button class="btn btn-danger-solid" data-act="confirmarAnular" data-id="${s.id}">Sí, anular suscripción</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function vistaNotifs(){
+  const ns = state.notifs.slice(0, 30);
+  return `
+  <div class="notif-pop" role="dialog" aria-label="Notificaciones">
+    <header><strong>Notificaciones</strong><button class="btn btn-sm" data-act="leerTodo">Marcar todo como leído</button></header>
+    ${ns.length ? ns.map(n => `
+      <button class="notif ${n.leida ? '' : 'unread'}" data-act="notif" data-id="${n.id}">
+        <span class="led ${n.nivel}"></span>
+        <span class="min0"><span class="t">${esc(n.titulo)}</span><br><span class="d">${esc(n.texto)}</span><br><span class="d">${fFecha(n.fecha)}</span></span>
+      </button>`).join('') : '<div class="empty">Sin notificaciones.</div>'}
+  </div>`;
+}
+
+/* ---------- Render principal ---------- */
+const VISTAS = {
+  inicio:vistaInicio, cuentas:vistaCuentas, tarjetas:vistaTarjetas,
+  transferencias:() => vistaFuera('Transferencias'), pagos:() => vistaFuera('Pagos')
+};
+
+function render(){
+  document.querySelectorAll('.nav button').forEach(b => b.setAttribute('aria-current', b.dataset.id === state.ui.tab ? 'page' : 'false'));
+  const noLeidas = state.notifs.filter(n => !n.leida).length;
+  const bc = $('#bell-count'); bc.hidden = noLeidas === 0; bc.textContent = noLeidas;
+  const pend = pendientes().length;
+  const nd = $('#nav-dot'); nd.hidden = pend === 0; nd.textContent = pend;
+  $('#view').innerHTML = VISTAS[state.ui.tab]();
+  $('#demo-fecha').textContent = fFecha(state.hoy);
+  $('#notif-root').innerHTML = notifAbierto ? vistaNotifs() : '';
+  let m = '';
+  if(modal){
+    const s = subPorId(modal.id);
+    if(s) m = modal.tipo === 'anular' ? modalAnular(s) : modalDetalle(s);
+  }
+  $('#modal-root').innerHTML = m;
+  document.body.style.overflow = m ? 'hidden' : '';
+}
+
+state = cargar();
+if(!state) estadoInicial();
+render();
+</script>
