@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Set
 
 from bank_app.app_models import (
     Transaction,
@@ -18,10 +18,20 @@ class BankState:
     subscription_candidates: List[SubscriptionCandidate] = field(default_factory=list)
     pending_authorizations: List[PendingAuthorization] = field(default_factory=list)
 
-    def add_transaction(self, transaction: Transaction) -> None:
+    processed_demo_transactions: Set[str] = field(
+        default_factory=set
+    )
+
+    def add_transaction(
+        self,
+        transaction: Transaction,
+    ) -> None:
         self.transactions.append(transaction)
 
-    def add_subscription(self, subscription: Subscription) -> None:
+    def add_subscription(
+        self,
+        subscription: Subscription,
+    ) -> None:
         self.subscriptions.append(subscription)
 
     def add_subscription_candidate(

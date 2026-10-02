@@ -295,15 +295,14 @@ def render_new_transaction(
                 "",
             ).strip().upper()
             not in blocked_merchant_names
+            and
+            (
+                f"{transaction.get('customer_id', 'UNKNOWN')}"
+                f"|{transaction.get('merchant_id', 'UNKNOWN')}"
+            )
+            not in bank.processed_demo_transactions
         )
     ]
-
-    if not available_transactions:
-
-        st.info(
-            "No quedan transacciones de prueba disponibles."
-        )
-        return
 
     # --------------------------------------------------------
     # SELECTOR

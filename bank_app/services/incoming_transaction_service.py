@@ -16,6 +16,7 @@ from bank_app.state.bank_state import BankState
 
 
 def process_incoming_transaction(
+    
     bank: BankState,
     raw_transaction: dict,
 ) -> tuple[Transaction, FilterAnalysis]:
@@ -28,7 +29,18 @@ def process_incoming_transaction(
     3. Si el filtro detecta una SUBSCRIPTION,
        se crea un SubscriptionCandidate.
     """
+    demo_transaction_key = (
+        f"{raw_transaction.get('customer_id', 'UNKNOWN')}"
+        f"|{raw_transaction.get('merchant_id', 'UNKNOWN')}"
+    )
 
+    if (
+        demo_transaction_key
+        in bank.processed_demo_transactions
+    ):
+        raise ValueError(
+            "Esta transacción de demostración ya fue procesada."
+        )
     # ========================================================
     # FILTRO REAL
     # ========================================================
@@ -76,6 +88,10 @@ def process_incoming_transaction(
     )
 
     bank.add_transaction(transaction)
+
+    bank.processed_demo_transactions.add(
+        demo_transaction_key
+    )
 
     # El primer cobro ya llegó y fue procesado.
     bank.balance -= transaction.amount
