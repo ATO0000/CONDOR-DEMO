@@ -57,8 +57,17 @@ def confirm_subscription_candidate(
         (
             subscription
             for subscription in bank.subscriptions
-            if subscription.merchant_id == candidate.merchant_id
-            and subscription.status == SubscriptionStatus.ACTIVE
+            if (
+                subscription.status
+                == SubscriptionStatus.ACTIVE
+                and (
+                    subscription.merchant_id
+                    == candidate.merchant_id
+                    or
+                    subscription.merchant.strip().upper()
+                    == candidate.merchant.strip().upper()
+                )
+            )
         ),
         None,
     )

@@ -1,25 +1,75 @@
+import json
+from pathlib import Path
+
 import streamlit as st
 
-from bank_app.app_models import TransactionStatus
+from bank_app.app_models import (
+    SubscriptionCandidateStatus,
+    TransactionStatus,
+)
+from bank_app.services.incoming_transaction_service import (
+    process_incoming_transaction,
+)
+from bank_app.services.subscription_service import (
+    confirm_subscription_candidate,
+    reject_subscription_candidate,
+)
 from bank_app.services.transaction_service import (
     simulate_subscription_charge,
 )
 from bank_app.state.bank_state import BankState
 
 
+# ============================================================
+# PATHS
+# ============================================================
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
+EVALUATION_DATA_PATH = (
+    PROJECT_ROOT / "evaluation_transactions.json"
+)
+
+
+# ============================================================
+# HELPERS
+# ============================================================
+
 def format_clp(amount: float) -> str:
     formatted = f"{amount:,.0f}".replace(",", ".")
     return f"${formatted}"
 
 
-def render_simulator(bank: BankState) -> None:
-    st.title("Simulador de cobros")
+def format_confidence(value: float | None) -> str:
+    if value is None:
+        return "No disponible"
+
+    return f"{value * 100:.1f}%"
+
+
+def load_evaluation_transactions() -> list[dict]:
+    with open(
+        EVALUATION_DATA_PATH,
+        "r",
+        encoding="utf-8",
+    ) as file:
+        return json.load(file)
+
+
+# ============================================================
+# KNOWN SUBSCRIPTION CHARGE
+# ============================================================
+
+def render_known_subscription_charge(
+    bank: BankState,
+) -> None:
+
+    st.subheader("Cobro de suscripción conocida")
 
     st.caption(
-        "Simula la llegada de un nuevo cobro de una suscripción conocida."
+        "Simula un nuevo cobro de una suscripción que "
+        "ya está registrada en el banco."
     )
-
-    st.write("")
 
     active_subscriptions = [
         subscription
@@ -28,12 +78,10 @@ def render_simulator(bank: BankState) -> None:
     ]
 
     if not active_subscriptions:
-        st.info("No existen suscripciones activas para simular.")
+        st.info(
+            "No existen suscripciones activas para simular."
+        )
         return
-
-    # ========================================================
-    # SELECCIÓN
-    # ========================================================
 
     subscription_by_name = {
         subscription.merchant: subscription
@@ -43,13 +91,10 @@ def render_simulator(bank: BankState) -> None:
     selected_name = st.selectbox(
         "Suscripción",
         options=list(subscription_by_name.keys()),
+        key="known-subscription-selector",
     )
 
     subscription = subscription_by_name[selected_name]
-
-    # ========================================================
-    # INFORMACIÓN ACTUAL
-    # ========================================================
 
     with st.container(border=True):
 
@@ -57,6 +102,7 @@ def render_simulator(bank: BankState) -> None:
 
         with col1:
             st.caption("Precio conocido")
+
             st.markdown(
                 f"### {format_clp(subscription.current_price)}"
             )
@@ -71,13 +117,10 @@ def render_simulator(bank: BankState) -> None:
 
         with col3:
             st.caption("Estado")
-            st.success(subscription.status.value)
 
-    st.write("")
-
-    # ========================================================
-    # NUEVO COBRO
-    # ========================================================
+            st.success(
+                subscription.status.value
+            )
 
     attempted_amount = st.number_input(
         "Nuevo intento de cobro",
@@ -88,7 +131,8 @@ def render_simulator(bank: BankState) -> None:
     )
 
     price_difference = (
-        attempted_amount - subscription.current_price
+        attempted_amount
+        - subscription.current_price
     )
 
     if price_difference > 0:
@@ -123,16 +167,11 @@ def render_simulator(bank: BankState) -> None:
             "El monto coincide con el precio conocido."
         )
 
-    st.write("")
-
-    # ========================================================
-    # SIMULAR
-    # ========================================================
-
     if st.button(
         "Simular intento de cobro",
         type="primary",
         use_container_width=True,
+        key="simulate-known-charge",
     ):
 
         try:
@@ -142,10 +181,6 @@ def render_simulator(bank: BankState) -> None:
                 subscription_id=subscription.id,
                 attempted_amount=attempted_amount,
             )
-
-            # =================================================
-            # COBRO DETENIDO
-            # =================================================
 
             if (
                 transaction.status
@@ -158,8 +193,8 @@ def render_simulator(bank: BankState) -> None:
 
                 st.warning(
                     f"{subscription.merchant} intentó cobrar "
-                    f"{format_clp(attempted_amount)}, pero el precio "
-                    f"conocido era "
+                    f"{format_clp(attempted_amount)}, "
+                    f"pero el precio conocido era "
                     f"{format_clp(subscription.current_price)}."
                 )
 
@@ -167,10 +202,6 @@ def render_simulator(bank: BankState) -> None:
                     "Como esta suscripción está supervisada, "
                     "el cobro requiere aprobación del usuario."
                 )
-
-            # =================================================
-            # COBRO PROCESADO
-            # =================================================
 
             elif (
                 transaction.status
@@ -182,9 +213,498 @@ def render_simulator(bank: BankState) -> None:
                 )
 
                 st.write(
-                    f"Nuevo saldo: **{format_clp(bank.balance)}**"
+                    f"Nuevo saldo: "
+                    f"**{format_clp(bank.balance)}**"
                 )
 
         except ValueError as error:
 
             st.error(str(error))
+
+
+# ============================================================
+# NEW TRANSACTION
+# ============================================================
+
+def render_new_transaction(
+    bank: BankState,
+) -> None:
+
+    st.subheader("Nueva transacción")
+
+    st.caption(
+        "Simula la llegada del primer cobro de un comercio "
+        "y analízalo con el filtro real."
+    )
+
+    try:
+        transactions = load_evaluation_transactions()
+
+    except FileNotFoundError:
+
+        st.error(
+            "No se encontró evaluation_transactions.json."
+        )
+        return
+
+    # --------------------------------------------------------
+    # Evitar utilizar como "nuevo comercio" uno que ya sea una
+    # suscripción activa o tenga confirmación pendiente.
+    # --------------------------------------------------------
+
+    blocked_merchant_ids = {
+        subscription.merchant_id
+        for subscription in bank.subscriptions
+        if subscription.status.value == "ACTIVE"
+    }
+
+    blocked_merchant_names = {
+        subscription.merchant.strip().upper()
+        for subscription in bank.subscriptions
+        if subscription.status.value == "ACTIVE"
+    }
+
+    blocked_merchant_ids.update(
+        candidate.merchant_id
+        for candidate in bank.subscription_candidates
+        if (
+            candidate.status
+            == SubscriptionCandidateStatus.PENDING_CONFIRMATION
+        )
+    )
+
+    blocked_merchant_names.update(
+        candidate.merchant.strip().upper()
+        for candidate in bank.subscription_candidates
+        if (
+            candidate.status
+            == SubscriptionCandidateStatus.PENDING_CONFIRMATION
+        )
+    )
+
+    available_transactions = [
+        transaction
+        for transaction in transactions
+        if (
+            transaction.get("merchant_id")
+            not in blocked_merchant_ids
+            and
+            transaction.get(
+                "merchant",
+                "",
+            ).strip().upper()
+            not in blocked_merchant_names
+        )
+    ]
+
+    if not available_transactions:
+
+        st.info(
+            "No quedan transacciones de prueba disponibles."
+        )
+        return
+
+    # --------------------------------------------------------
+    # SELECTOR
+    # --------------------------------------------------------
+
+    transaction_options = {}
+
+    for index, transaction in enumerate(
+        available_transactions
+    ):
+
+        label = (
+            f"{transaction.get('merchant', 'UNKNOWN')} · "
+            f"{format_clp(float(transaction.get('amount', 0)))} · "
+            f"MCC {transaction.get('mcc', '-')}"
+        )
+
+        # Evitar problemas si existieran labels repetidos.
+        label = f"{label} · #{index + 1}"
+
+        transaction_options[label] = transaction
+
+    selected_label = st.selectbox(
+        "Transacción de prueba",
+        options=list(transaction_options.keys()),
+        key="incoming-transaction-selector",
+    )
+
+    raw_transaction = transaction_options[
+        selected_label
+    ]
+
+    # --------------------------------------------------------
+    # RESUMEN
+    # --------------------------------------------------------
+
+    with st.container(border=True):
+
+        col1, col2, col3 = st.columns(3)
+
+        with col1:
+
+            st.caption("Comercio")
+
+            st.markdown(
+                f"### {raw_transaction.get('merchant')}"
+            )
+
+        with col2:
+
+            st.caption("Monto")
+
+            st.markdown(
+                f"### "
+                f"{format_clp(float(raw_transaction.get('amount', 0)))}"
+            )
+
+        with col3:
+
+            st.caption("Red")
+
+            st.markdown(
+                f"### {raw_transaction.get('network', '-')}"
+            )
+
+        st.caption(
+            "Esta transacción todavía no ha sido clasificada "
+            "por la aplicación."
+        )
+
+    # --------------------------------------------------------
+    # INFORMACIÓN TÉCNICA
+    # --------------------------------------------------------
+
+    with st.expander(
+        "Ver información recibida por el filtro"
+    ):
+
+        st.write(
+            f"**Merchant ID:** "
+            f"{raw_transaction.get('merchant_id')}"
+        )
+
+        st.write(
+            f"**MCC:** "
+            f"{raw_transaction.get('mcc')}"
+        )
+
+        st.write(
+            f"**E-commerce:** "
+            f"{raw_transaction.get('ecommerce')}"
+        )
+
+        st.write(
+            f"**Stored credential:** "
+            f"{raw_transaction.get('stored_credential')}"
+        )
+
+        st.write(
+            f"**Cardholder present:** "
+            f"{raw_transaction.get('cardholder_present')}"
+        )
+
+        st.caption(
+            "La etiqueta true_type del dataset no se entrega "
+            "al filtro y no participa en la detección."
+        )
+
+    # --------------------------------------------------------
+    # PROCESAR
+    # --------------------------------------------------------
+
+    if st.button(
+        "Procesar nueva transacción",
+        type="primary",
+        use_container_width=True,
+        key="process-new-transaction",
+    ):
+
+        # Copia para no modificar el dataset cargado.
+        transaction_for_filter = raw_transaction.copy()
+
+        # true_type es únicamente ground truth del dataset.
+        # El filtro NO puede utilizarlo.
+        transaction_for_filter.pop(
+            "true_type",
+            None,
+        )
+
+        try:
+
+            transaction, analysis = (
+                process_incoming_transaction(
+                    bank,
+                    transaction_for_filter,
+                )
+            )
+
+            st.divider()
+
+            if not analysis.is_recurring:
+
+                st.success(
+                    "Transacción procesada como compra normal."
+                )
+
+                st.write(
+                    f"El filtro clasificó el pago como "
+                    f"**{analysis.recurring_type}**."
+                )
+
+            elif (
+                analysis.recurring_type
+                == "SUBSCRIPTION"
+            ):
+
+                st.warning(
+                    "🔁 Posible suscripción detectada"
+                )
+
+                st.write(
+                    "Detectamos que este comercio probablemente "
+                    "realizará cobros periódicos."
+                )
+
+                st.write(
+                    f"Confianza de recurrencia: "
+                    f"**{format_confidence(analysis.recurrence_confidence)}**"
+                )
+
+                st.write(
+                    f"Tipo estimado: "
+                    f"**{analysis.recurring_type}**"
+                )
+
+            else:
+
+                st.info(
+                    "El filtro detectó un pago recurrente."
+                )
+
+                st.write(
+                    f"Tipo detectado: "
+                    f"**{analysis.recurring_type}**"
+                )
+
+            with st.expander(
+                "Información del detector"
+            ):
+
+                st.write(
+                    f"**Nivel de detección:** "
+                    f"{analysis.detection_level}"
+                )
+
+                st.write(
+                    f"**Confianza de recurrencia:** "
+                    f"{format_confidence(analysis.recurrence_confidence)}"
+                )
+
+                st.write(
+                    f"**Confianza del tipo:** "
+                    f"{format_confidence(analysis.type_confidence)}"
+                )
+
+                if analysis.reasons:
+
+                    st.markdown(
+                        "**Razones de detección:**"
+                    )
+
+                    for reason in analysis.reasons:
+                        st.write(f"- {reason}")
+
+        except Exception as error:
+
+            st.error(
+                f"No fue posible procesar la transacción: "
+                f"{error}"
+            )
+
+    # ========================================================
+    # CANDIDATOS PENDIENTES
+    # ========================================================
+
+    pending_candidates = [
+        candidate
+        for candidate in bank.subscription_candidates
+        if (
+            candidate.status
+            == SubscriptionCandidateStatus.PENDING_CONFIRMATION
+        )
+    ]
+
+    if pending_candidates:
+
+        st.divider()
+
+        st.subheader(
+            "Suscripciones por confirmar"
+        )
+
+    for candidate in pending_candidates:
+
+        transaction = bank.get_transaction_by_id(
+            candidate.transaction_id
+        )
+
+        if transaction is None:
+            continue
+
+        with st.container(border=True):
+
+            st.warning(
+                "Posible suscripción detectada"
+            )
+
+            st.markdown(
+                f"### {candidate.merchant}"
+            )
+
+            st.write(
+                "Detectamos que este comercio probablemente "
+                "realizará cobros periódicos."
+            )
+
+            st.markdown(
+                "**¿Corresponde a una suscripción?**"
+            )
+
+            col1, col2, col3 = st.columns(3)
+
+            with col1:
+                st.caption("Monto del primer cobro")
+
+                st.write(
+                    format_clp(
+                        transaction.amount
+                    )
+                )
+
+            with col2:
+                st.caption("Tipo estimado")
+
+                st.write(
+                    candidate.detected_type
+                )
+
+            with col3:
+                st.caption("Confianza")
+
+                st.write(
+                    format_confidence(
+                        candidate.recurrence_confidence
+                    )
+                )
+
+            with st.expander(
+                "¿Por qué fue detectada?"
+            ):
+
+                for reason in candidate.reasons:
+                    st.write(f"- {reason}")
+
+            yes_col, no_col = st.columns(2)
+
+            with yes_col:
+
+                if st.button(
+                    "Sí, es una suscripción",
+                    key=f"confirm-{candidate.id}",
+                    type="primary",
+                    use_container_width=True,
+                ):
+
+                    try:
+
+                        subscription = (
+                            confirm_subscription_candidate(
+                                bank,
+                                candidate.id,
+                            )
+                        )
+
+                        st.session_state[
+                            "subscription_feedback"
+                        ] = (
+                            f"{subscription.merchant} fue agregada "
+                            f"como suscripción supervisada."
+                        )
+
+                        st.rerun()
+
+                    except ValueError as error:
+
+                        st.error(str(error))
+
+            with no_col:
+
+                if st.button(
+                    "No, no es una suscripción",
+                    key=f"reject-candidate-{candidate.id}",
+                    use_container_width=True,
+                ):
+
+                    try:
+
+                        reject_subscription_candidate(
+                            bank,
+                            candidate.id,
+                        )
+
+                        st.session_state[
+                            "subscription_feedback"
+                        ] = (
+                            f"{candidate.merchant} no fue agregado "
+                            f"a tus suscripciones."
+                        )
+
+                        st.rerun()
+
+                    except ValueError as error:
+
+                        st.error(str(error))
+
+
+# ============================================================
+# MAIN SIMULATOR
+# ============================================================
+
+def render_simulator(bank: BankState) -> None:
+
+    st.title("Simulador")
+
+    st.caption(
+        "Prueba el comportamiento del sistema frente "
+        "a distintos tipos de cobro."
+    )
+
+    if "subscription_feedback" in st.session_state:
+
+        st.success(
+            st.session_state.pop(
+                "subscription_feedback"
+            )
+        )
+
+    known_tab, new_tab = st.tabs(
+        [
+            "Cobro de suscripción conocida",
+            "Nueva transacción",
+        ]
+    )
+
+    with known_tab:
+
+        render_known_subscription_charge(
+            bank
+        )
+
+    with new_tab:
+
+        render_new_transaction(
+            bank
+        )
