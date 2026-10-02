@@ -247,6 +247,7 @@ def render_new_transaction(
         )
         return
 
+
     # --------------------------------------------------------
     # Evitar utilizar como "nuevo comercio" uno que ya sea una
     # suscripción activa o tenga confirmación pendiente.
