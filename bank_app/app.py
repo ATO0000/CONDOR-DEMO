@@ -40,25 +40,41 @@ bank = get_bank_state()
 
 with st.sidebar:
 
-    st.markdown("## 🛡️ Banco Digital")
+    st.markdown("## Banco Digital")
 
     st.caption(
-        "Protección inteligente de pagos recurrentes"
+        "Cuenta personal"
     )
 
     st.divider()
 
-    selected_page = st.radio(
-        "Navegación",
-        [
-            "Inicio",
-            "Movimientos",
-            "Suscripciones",
-            "Autorizaciones",
-            "Simulador",
-        ],
-        label_visibility="collapsed",
-    )
+    pages = [
+        "Inicio",
+        "Movimientos",
+        "Suscripciones",
+        "Autorizaciones",
+        "Simulador",
+    ]
+
+    if "selected_page" not in st.session_state:
+        st.session_state.selected_page = "Inicio"
+
+    for page in pages:
+
+        is_active = (
+            st.session_state.selected_page == page
+        )
+
+        if st.button(
+            page,
+            key=f"nav-{page}",
+            type="primary" if is_active else "tertiary",
+            use_container_width=True,
+        ):
+            st.session_state.selected_page = page
+            st.rerun()
+
+    selected_page = st.session_state.selected_page
 
     st.divider()
 
@@ -76,10 +92,11 @@ with st.sidebar:
             f"{'n' if pending_count != 1 else ''} tu atención."
         )
 
-    st.caption("Entorno de demostración")
+    st.caption("Prototipo universitario")
 
     if st.button(
         "↻ Reiniciar demo",
+        key="reset-demo",
         use_container_width=True,
     ):
         reset_bank_state()

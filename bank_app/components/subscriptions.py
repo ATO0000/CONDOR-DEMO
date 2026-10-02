@@ -1,8 +1,23 @@
+from html import escape
+
 import streamlit as st
 
-from bank_app.app_models import TrustStatus
-from bank_app.state.bank_state import BankState
+from bank_app.app_models import (
+    SubscriptionCandidateStatus,
+    SubscriptionStatus,
+    TrustStatus,
+)
 
+from bank_app.services.subscription_service import (
+    confirm_subscription_candidate,
+    reject_subscription_candidate,
+)
+
+
+
+# ============================================================
+# HELPERS
+# ============================================================
 
 def format_clp(amount: float) -> str:
     formatted = f"{amount:,.0f}".replace(",", ".")
@@ -15,230 +30,310 @@ def format_confidence(value: float | None) -> str:
 
     return f"{value * 100:.1f}%"
 
-def render_subscription_card(
+
+def recurring_type_label(value: str) -> str:
+    labels = {
+        "SUBSCRIPTION": "Suscripción",
+        "RECURRING_BILL": "Pago recurrente",
+        "UNKNOWN_RECURRING": "Pago recurrente",
+    }
+
+    return labels.get(value, value)
+
+
+def trust_pill(subscription) -> str:
+
+    if subscription.trust_status == TrustStatus.TRUSTED:
+        return (
+            '<span class="pill pill-ok">'
+            "De confianza"
+            "</span>"
+        )
+
+    return (
+        '<span class="pill pill-watch">'
+        "Supervisada"
+        "</span>"
+    )
+
+
+def status_pill(subscription) -> str:
+
+    if subscription.status == SubscriptionStatus.ACTIVE:
+        return (
+            '<span class="pill pill-ok">'
+            "Activa"
+            "</span>"
+        )
+
+    return (
+        '<span class="pill pill-neutral">'
+        "Cancelada"
+        "</span>"
+    )
+
+
+# ============================================================
+# SUBSCRIPTION ROW
+# ============================================================
+
+def render_subscription(
     bank: BankState,
     subscription,
 ) -> None:
 
-    with st.container(border=True):
+    merchant = escape(subscription.merchant)
 
-        col1, col2, col3 = st.columns([2.5, 1, 1])
+    col_name, col_price, col_trust, col_status = st.columns(
+        [2.4, 1, 1.25, 0.9],
+        vertical_alignment="center",
+    )
 
-        with col1:
-            st.markdown(
-                f"### {subscription.merchant}"
+    # --------------------------------------------------------
+    # MERCHANT
+    # --------------------------------------------------------
+
+    with col_name:
+
+        st.markdown(
+            f"**{merchant}**"
+        )
+
+        st.caption(
+            f"{recurring_type_label(subscription.recurring_type)}"
+            f" · {subscription.frequency}"
+        )
+
+    # --------------------------------------------------------
+    # PRICE
+    # --------------------------------------------------------
+
+    with col_price:
+
+        st.markdown(
+            f"**{format_clp(subscription.current_price)}**"
+        )
+
+        st.caption(
+            "Precio actual"
+        )
+
+    # --------------------------------------------------------
+    # TRUST
+    # --------------------------------------------------------
+
+    with col_trust:
+
+        st.html(
+            trust_pill(subscription)
+        )
+
+    # --------------------------------------------------------
+    # STATUS
+    # --------------------------------------------------------
+
+    with col_status:
+
+        st.html(
+            status_pill(subscription)
+        )
+
+    # ========================================================
+    # DETAILS
+    # ========================================================
+
+    with st.expander("Administrar"):
+
+        info_col, detector_col = st.columns(
+            [1, 1],
+            gap="large",
+        )
+
+        # ----------------------------------------------------
+        # SUBSCRIPTION INFO
+        # ----------------------------------------------------
+
+        with info_col:
+
+            st.markdown("#### Detalle")
+
+            st.write(
+                f"**Precio actual:** "
+                f"{format_clp(subscription.current_price)}"
             )
 
-            st.caption(
-                f"{subscription.recurring_type} · "
+            st.write(
+                f"**Frecuencia:** "
                 f"{subscription.frequency}"
             )
 
             st.write(
-                f"Último cobro: "
+                f"**Último cobro:** "
                 f"{subscription.last_charge_date.strftime('%d/%m/%Y')}"
             )
 
-        with col2:
-            st.caption("Precio actual")
-
-            st.markdown(
-                f"### {format_clp(subscription.current_price)}"
+            st.write(
+                f"**Estado:** "
+                f"{'Activa' if subscription.status == SubscriptionStatus.ACTIVE else 'Cancelada'}"
             )
 
-            st.caption(
-                f"/ {subscription.frequency.lower()}"
+            st.write(
+                f"**Confianza:** "
+                f"{'De confianza' if subscription.trust_status == TrustStatus.TRUSTED else 'Supervisada'}"
             )
 
-        with col3:
-            st.caption("Estado")
+        # ----------------------------------------------------
+        # DETECTOR INFO
+        # ----------------------------------------------------
 
-            if subscription.status.value == "ACTIVE":
-                st.success("Activa")
+        with detector_col:
+
+            st.markdown("#### Información del detector")
+
+            st.write(
+                "**Probabilidad de recurrencia:** "
+                f"{format_confidence(subscription.recurrence_confidence)}"
+            )
+
+            st.write(
+                "**Confianza del tipo:** "
+                f"{format_confidence(subscription.type_confidence)}"
+            )
+
+            if subscription.detection_reasons:
+
+                with st.popover("Ver razones de detección"):
+
+                    for reason in subscription.detection_reasons:
+                        st.write(f"• {reason}")
+
             else:
-                st.error("Cancelada")
+
+                st.caption(
+                    "No hay información adicional del detector."
+                )
+
+        # ====================================================
+        # HISTORY
+        # ====================================================
 
         st.divider()
 
-        # ====================================================
-        # TRUST STATUS
-        # ====================================================
+        st.markdown("#### Historial")
 
-        col_status, col_button = st.columns([2, 1])
+        if subscription.transaction_history:
 
-        with col_status:
-            st.caption("Nivel de confianza")
+            for transaction_id in subscription.transaction_history:
 
-            if subscription.trust_status == TrustStatus.TRUSTED:
-
-                st.success("✓ De confianza")
-
-                st.caption(
-                    "Esta suscripción tiene menor fricción "
-                    "en sus cobros."
+                transaction = bank.get_transaction_by_id(
+                    transaction_id
                 )
 
-            else:
+                if transaction is None:
+                    continue
 
-                st.warning("⚠ Supervisada")
-
-                st.caption(
-                    "Los cambios de precio serán revisados "
-                    "antes de procesarse."
+                date_col, amount_col = st.columns(
+                    [3, 1]
                 )
 
-        with col_button:
+                with date_col:
 
-            if subscription.status.value == "ACTIVE":
+                    st.write(
+                        transaction.date.strftime(
+                            "%d/%m/%Y"
+                        )
+                    )
+
+                with amount_col:
+
+                    st.write(
+                        format_clp(
+                            transaction.amount
+                        )
+                    )
+
+        else:
+
+            st.caption(
+                "No hay cobros registrados."
+            )
+
+        # ====================================================
+        # MANAGEMENT
+        # ====================================================
+
+        st.divider()
+
+        st.markdown("#### Gestión")
+
+        if subscription.status == SubscriptionStatus.ACTIVE:
+
+            action_col, cancel_col = st.columns(
+                [1, 1],
+                gap="large",
+            )
+
+            # ------------------------------------------------
+            # TRUST
+            # ------------------------------------------------
+
+            with action_col:
+
+                st.caption("Nivel de confianza")
 
                 if subscription.trust_status == TrustStatus.TRUSTED:
 
+                    st.write(
+                        "Los cobros de esta suscripción "
+                        "se procesan con menor fricción."
+                    )
+
                     if st.button(
-                        "Marcar como supervisada",
+                        "Pasar a supervisada",
                         key=f"untrust-{subscription.id}",
                         use_container_width=True,
                     ):
-                        subscription.trust_status = TrustStatus.UNTRUSTED
+
+                        subscription.trust_status = (
+                            TrustStatus.UNTRUSTED
+                        )
+
                         st.rerun()
 
                 else:
+
+                    st.write(
+                        "Los aumentos de precio requieren "
+                        "tu aprobación."
+                    )
 
                     if st.button(
                         "Marcar como de confianza",
                         key=f"trust-{subscription.id}",
                         use_container_width=True,
                     ):
-                        subscription.trust_status = TrustStatus.TRUSTED
+
+                        subscription.trust_status = (
+                            TrustStatus.TRUSTED
+                        )
+
                         st.rerun()
 
-            else:
+            # ------------------------------------------------
+            # CANCEL
+            # ------------------------------------------------
 
-                st.caption(
-                    "Suscripción cancelada"
-                )
+            with cancel_col:
 
-        # ====================================================
-        # DETALLE
-        # ====================================================
-
-        with st.expander("Ver detalle"):
-
-            detail1, detail2 = st.columns(2)
-
-            with detail1:
-
-                st.markdown("#### Información de la suscripción")
+                st.caption("Cancelar suscripción")
 
                 st.write(
-                    f"**Comercio:** {subscription.merchant}"
-                )
-
-                st.write(
-                    f"**Precio actual:** "
-                    f"{format_clp(subscription.current_price)}"
-                )
-
-                st.write(
-                    f"**Frecuencia estimada:** "
-                    f"{subscription.frequency}"
-                )
-
-                st.write(
-                    f"**Último cobro:** "
-                    f"{subscription.last_charge_date.strftime('%d/%m/%Y')}"
-                )
-
-                st.write(
-                    f"**Tipo detectado:** "
-                    f"{subscription.recurring_type}"
-                )
-
-                st.write(
-                    f"**Estado:** "
-                    f"{subscription.status.value}"
-                )
-
-                st.write(
-                    f"**Confianza:** "
-                    f"{subscription.trust_status.value}"
-                )
-
-            with detail2:
-
-                st.markdown("#### Información del detector")
-
-                st.write(
-                    "**Probabilidad de recurrencia:** "
-                    f"{format_confidence(subscription.recurrence_confidence)}"
-                )
-
-                st.write(
-                    "**Confianza del tipo:** "
-                    f"{format_confidence(subscription.type_confidence)}"
-                )
-
-                if subscription.detection_reasons:
-
-                    st.markdown("**Razones de detección:**")
-
-                    for reason in subscription.detection_reasons:
-                        st.write(f"- {reason}")
-
-                else:
-
-                    st.caption(
-                        "No hay razones detalladas disponibles "
-                        "para este registro de demostración."
-                    )
-
-            st.divider()
-
-            st.markdown("#### Historial asociado")
-
-            if subscription.transaction_history:
-
-                for transaction_id in subscription.transaction_history:
-
-                    transaction = bank.get_transaction_by_id(
-                        transaction_id
-                    )
-
-                    if transaction is None:
-                        continue
-
-                    col_date, col_amount = st.columns([2, 1])
-
-                    with col_date:
-                        st.write(
-                            transaction.date.strftime(
-                                "%d/%m/%Y"
-                            )
-                        )
-
-                    with col_amount:
-                        st.write(
-                            format_clp(transaction.amount)
-                        )
-
-            else:
-
-                st.caption(
-                    "No hay cobros registrados en el historial."
-                )
-
-            st.divider()
-
-            st.markdown("#### Gestión")
-
-            if subscription.status.value == "ACTIVE":
-
-                st.warning(
-                    "Cancelar esta suscripción cambiará su estado "
-                    "dentro del gemelo digital."
+                    "La cancelación se simula dentro "
+                    "del gemelo digital."
                 )
 
                 confirm_cancel = st.checkbox(
-                    "Confirmo que quiero cancelar esta suscripción",
+                    "Confirmar cancelación",
                     key=f"confirm-cancel-{subscription.id}",
                 )
 
@@ -249,78 +344,248 @@ def render_subscription_card(
                     disabled=not confirm_cancel,
                 ):
 
-                    from bank_app.app_models import SubscriptionStatus
-
-                    subscription.status = SubscriptionStatus.CANCELLED
+                    subscription.status = (
+                        SubscriptionStatus.CANCELLED
+                    )
 
                     st.rerun()
 
-            else:
+        else:
 
-                st.error("Esta suscripción está cancelada.")
+            st.caption(
+                "Esta suscripción fue cancelada. "
+                "Su historial se conserva en la cuenta."
+            )
 
-                st.caption(
-                    "En una implementación real, la cancelación "
-                    "requeriría integración con el comercio, "
-                    "proveedor o red de pagos."
-                )
-                
+
+# ============================================================
+# PAGE
+# ============================================================
+
 def render_subscriptions(bank: BankState) -> None:
+
     st.title("Suscripciones")
 
     st.caption(
-        "Administra tus pagos recurrentes y define cuáles son de confianza."
+        "Administra tus pagos recurrentes y su nivel de confianza."
     )
 
     st.write("")
 
+    # ========================================================
+    # PENDING CONFIRMATION
+    # ========================================================
+
+    pending_candidates = [
+        candidate
+        for candidate in bank.subscription_candidates
+        if (
+            candidate.status
+            == SubscriptionCandidateStatus.PENDING_CONFIRMATION
+        )
+    ]
+
+    if pending_candidates:
+
+        st.markdown("### Por confirmar")
+
+        st.caption(
+            "Detectamos pagos que podrían corresponder "
+            "a nuevas suscripciones."
+        )
+
+        for candidate in pending_candidates:
+
+            transaction = bank.get_transaction_by_id(
+                candidate.transaction_id
+            )
+
+            if transaction is None:
+                continue
+
+            with st.container(border=True):
+
+                info_col, amount_col = st.columns(
+                    [3, 1],
+                    vertical_alignment="center",
+                )
+
+                with info_col:
+
+                    st.markdown(
+                        f"**{candidate.merchant}**"
+                    )
+
+                    st.caption(
+                        "Posible suscripción detectada"
+                    )
+
+                with amount_col:
+
+                    st.markdown(
+                        f"**{format_clp(transaction.amount)}**"
+                    )
+
+                    st.caption(
+                        "Primer cobro"
+                    )
+
+                st.write(
+                    "¿Reconoces este pago como una suscripción?"
+                )
+
+                yes_col, no_col = st.columns(2)
+
+                with yes_col:
+
+                    if st.button(
+                        "Sí, agregar a suscripciones",
+                        key=f"confirm-sub-{candidate.id}",
+                        type="primary",
+                        use_container_width=True,
+                    ):
+
+                        try:
+
+                            confirm_subscription_candidate(
+                                bank,
+                                candidate.id,
+                            )
+
+                            st.rerun()
+
+                        except ValueError as error:
+
+                            st.error(str(error))
+
+                with no_col:
+
+                    if st.button(
+                        "No es una suscripción",
+                        key=f"reject-sub-{candidate.id}",
+                        use_container_width=True,
+                    ):
+
+                        try:
+
+                            reject_subscription_candidate(
+                                bank,
+                                candidate.id,
+                            )
+
+                            st.rerun()
+
+                        except ValueError as error:
+
+                            st.error(str(error))
+
+        st.write("")
+
+    # ========================================================
+    # ACTIVE / CANCELLED
+    # ========================================================
+
     active_subscriptions = [
         subscription
         for subscription in bank.subscriptions
-        if subscription.status.value == "ACTIVE"
+        if subscription.status == SubscriptionStatus.ACTIVE
     ]
 
     cancelled_subscriptions = [
         subscription
         for subscription in bank.subscriptions
-        if subscription.status.value == "CANCELLED"
+        if subscription.status == SubscriptionStatus.CANCELLED
     ]
 
-    if not bank.subscriptions:
-        st.info("No hay suscripciones registradas.")
-        return
-
     # ========================================================
-    # ACTIVAS
+    # SUMMARY
     # ========================================================
 
-    st.subheader("Suscripciones activas")
+    trusted_count = sum(
+        1
+        for subscription in active_subscriptions
+        if subscription.trust_status == TrustStatus.TRUSTED
+    )
+
+    supervised_count = (
+        len(active_subscriptions)
+        - trusted_count
+    )
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.metric(
+            "Activas",
+            len(active_subscriptions),
+        )
+
+    with col2:
+        st.metric(
+            "Supervisadas",
+            supervised_count,
+        )
+
+    with col3:
+        st.metric(
+            "De confianza",
+            trusted_count,
+        )
+
+    st.write("")
+
+    # ========================================================
+    # ACTIVE SUBSCRIPTIONS
+    # ========================================================
+
+    st.markdown("### Suscripciones activas")
 
     if not active_subscriptions:
-        st.info("No tienes suscripciones activas.")
+
+        st.info(
+            "No tienes suscripciones activas."
+        )
 
     else:
-        for subscription in active_subscriptions:
-            render_subscription_card(
-                bank,
-                subscription,
-            )
+
+        with st.container(border=True):
+
+            for index, subscription in enumerate(
+                active_subscriptions
+            ):
+
+                render_subscription(
+                    bank,
+                    subscription,
+                )
+
+                if index < len(active_subscriptions) - 1:
+                    st.divider()
 
     # ========================================================
-    # CANCELADAS
+    # CANCELLED SUBSCRIPTIONS
     # ========================================================
 
     if cancelled_subscriptions:
 
         st.write("")
-        st.subheader("Suscripciones canceladas")
+
+        st.markdown("### Canceladas")
 
         st.caption(
-            "Se conservan para mantener el historial del gemelo digital."
+            "Se mantienen visibles para conservar el historial."
         )
 
-        for subscription in cancelled_subscriptions:
-            render_subscription_card(
-                bank,
-                subscription,
-            )
+        with st.container(border=True):
+
+            for index, subscription in enumerate(
+                cancelled_subscriptions
+            ):
+
+                render_subscription(
+                    bank,
+                    subscription,
+                )
+
+                if index < len(cancelled_subscriptions) - 1:
+                    st.divider()

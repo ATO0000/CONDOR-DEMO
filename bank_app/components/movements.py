@@ -1,3 +1,5 @@
+from html import escape
+
 import streamlit as st
 
 from bank_app.state.bank_state import BankState
@@ -8,11 +10,51 @@ def format_clp(amount: float) -> str:
     return f"${formatted}"
 
 
+def get_transaction_label(
+    bank: BankState,
+    transaction,
+) -> tuple[str, str]:
+
+    pending_candidate = next(
+        (
+            candidate
+            for candidate in bank.subscription_candidates
+            if (
+                candidate.transaction_id == transaction.id
+                and candidate.status.value
+                == "PENDING_CONFIRMATION"
+            )
+        ),
+        None,
+    )
+
+    if pending_candidate is not None:
+        return "Posible suscripción", "pill-watch"
+
+    if transaction.status.value == "PENDING_APPROVAL":
+        return "Pendiente de aprobación", "pill-alert"
+
+    if transaction.status.value == "REJECTED":
+        return "Rechazado", "pill-neutral"
+
+    if transaction.status.value == "APPROVED":
+        return "Aprobado", "pill-ok"
+
+    if transaction.recurring_type == "SUBSCRIPTION":
+        return "Suscripción", "pill-watch"
+
+    if transaction.recurring_type == "RECURRING_BILL":
+        return "Pago recurrente", "pill-neutral"
+
+    return "Compra", "pill-neutral"
+
+
 def render_movements(bank: BankState) -> None:
+
     st.title("Movimientos")
 
     st.caption(
-        "Revisa tus transacciones y los pagos recurrentes detectados."
+        "Historial de transacciones de tu cuenta."
     )
 
     st.write("")
@@ -21,86 +63,114 @@ def render_movements(bank: BankState) -> None:
         st.info("No hay movimientos registrados.")
         return
 
-    # Más recientes primero
+    # ========================================================
+    # RESUMEN
+    # ========================================================
+
+    pending_count = sum(
+        1
+        for transaction in bank.transactions
+        if transaction.status.value == "PENDING_APPROVAL"
+    )
+
+    recurring_count = sum(
+        1
+        for transaction in bank.transactions
+        if transaction.recurring_type in {
+            "SUBSCRIPTION",
+            "RECURRING_BILL",
+        }
+    )
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.metric(
+            "Movimientos",
+            len(bank.transactions),
+        )
+
+    with col2:
+        st.metric(
+            "Pagos recurrentes",
+            recurring_count,
+        )
+
+    with col3:
+        st.metric(
+            "Pendientes",
+            pending_count,
+        )
+
+    st.write("")
+
+    # ========================================================
+    # LISTA
+    # ========================================================
+
     transactions = sorted(
         bank.transactions,
         key=lambda transaction: transaction.date,
         reverse=True,
     )
 
+    rows = []
+
     for transaction in transactions:
 
-        with st.container(border=True):
+        merchant = escape(
+            transaction.merchant
+        )
 
-            col1, col2 = st.columns([3, 1])
+        date_text = transaction.date.strftime(
+            "%d/%m/%Y · %H:%M"
+        )
 
-            # =================================================
-            # INFORMACIÓN PRINCIPAL
-            # =================================================
+        label, pill_class = get_transaction_label(
+            bank,
+            transaction,
+        )
 
-            with col1:
+        rows.append(
+            f"""
+            <div class="bank-row">
 
-                st.markdown(
-                    f"### {transaction.merchant}"
-                )
+                <div class="row-main">
 
-                st.caption(
-                    transaction.date.strftime(
-                        "%d/%m/%Y - %H:%M"
-                    )
-                )
+                    <div class="row-title">
+                        {merchant}
+                    </div>
 
-            with col2:
+                    <div class="row-subtitle">
+                        {date_text}
+                    </div>
 
-                st.markdown(
-                    f"### -{format_clp(transaction.amount)}"
-                )
+                </div>
 
-            # =================================================
-            # CLASIFICACIÓN
-            # =================================================
+                <div style="
+                    display:flex;
+                    align-items:center;
+                    gap:1.2rem;
+                    margin-left:auto;
+                ">
 
-            if transaction.recurring_type == "SUBSCRIPTION":
+                    <span class="pill {pill_class}">
+                        {label}
+                    </span>
 
-                st.info(
-                    "🔁 Este pago corresponde a una suscripción."
-                )
+                    <div class="row-amount"
+                         style="min-width:95px;text-align:right;">
+                        -{format_clp(transaction.amount)}
+                    </div>
 
-                st.caption(
-                    "El sistema identificó comportamiento recurrente "
-                    "asociado a este comercio."
-                )
+                </div>
 
-            elif transaction.recurring_type == "RECURRING_BILL":
+            </div>
+            """
+        )
 
-                st.info(
-                    "🔁 Este pago corresponde a un cobro recurrente."
-                )
-
-            else:
-
-                st.caption(
-                    "Compra normal"
-                )
-
-            # =================================================
-            # ESTADO DE LA TRANSACCIÓN
-            # =================================================
-
-            if transaction.status.value == "PENDING_APPROVAL":
-
-                st.warning(
-                    "⏳ Este cobro está esperando tu aprobación."
-                )
-
-            elif transaction.status.value == "REJECTED":
-
-                st.error(
-                    "Cobro rechazado"
-                )
-
-            elif transaction.status.value == "APPROVED":
-
-                st.success(
-                    "Cobro aprobado"
-                )
+    st.html(
+        '<div class="bank-list">'
+        + "".join(rows)
+        + "</div>"
+    )

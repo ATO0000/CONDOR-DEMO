@@ -50,40 +50,97 @@ def inject_global_styles() -> None:
 
 
         /* ====================================================
-           SIDEBAR
+        SIDEBAR
         ==================================================== */
 
-        [data-testid="stSidebar"] {
-            background: #102a43;
+        section[data-testid="stSidebar"],
+        section[data-testid="stSidebar"] > div,
+        [data-testid="stSidebarContent"] {
+            background-color: #102a43 !important;
         }
 
-        [data-testid="stSidebar"] * {
-            color: #f6f8fb;
+        /* Texto general */
+
+        section[data-testid="stSidebar"] h1,
+        section[data-testid="stSidebar"] h2,
+        section[data-testid="stSidebar"] h3,
+        section[data-testid="stSidebar"] p,
+        section[data-testid="stSidebar"] span,
+        section[data-testid="stSidebar"] label {
+            color: #f5f7fa !important;
         }
 
-        [data-testid="stSidebar"] hr {
-            border-color: rgba(255,255,255,0.10);
+        section[data-testid="stSidebar"] hr {
+            border-color: rgba(255,255,255,0.12) !important;
         }
 
-        [data-testid="stSidebar"] [role="radiogroup"] label {
-            padding: 0.52rem 0.55rem;
-            border-radius: 6px;
+
+        /* ====================================================
+        SIDEBAR NAVIGATION BUTTONS
+        ==================================================== */
+
+        section[data-testid="stSidebar"] .stButton {
+            margin-bottom: 0.15rem;
         }
 
-        [data-testid="stSidebar"] [role="radiogroup"] label:hover {
-            background: rgba(255,255,255,0.06);
-        }
-        [data-testid="stSidebar"] .stButton > button {
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.22);
-            color: #ffffff;
+        section[data-testid="stSidebar"] .stButton > button {
+            width: 100%;
+            justify-content: flex-start !important;
+            text-align: left !important;
+            padding-left: 0.85rem !important;
+            min-height: 2.7rem;
+            border-radius: 7px !important;
+            box-shadow: none !important;
+            color: #f5f7fa !important;
         }
 
-        [data-testid="stSidebar"] .stButton > button:hover {
-            background: rgba(255,255,255,0.07);
-            border-color: rgba(255,255,255,0.35);
-            color: #ffffff;
+        /* Inactivos */
+
+        section[data-testid="stSidebar"]
+        .stButton > button[kind="tertiary"] {
+            background: transparent !important;
+            border: none !important;
+            color: #f5f7fa !important;
         }
+
+        section[data-testid="stSidebar"]
+        .stButton > button[kind="tertiary"]:hover {
+            background: rgba(255,255,255,0.07) !important;
+            color: #ffffff !important;
+        }
+
+        /* Activo */
+
+        section[data-testid="stSidebar"]
+        .stButton > button[kind="primary"] {
+            background: rgba(255,255,255,0.13) !important;
+            border: none !important;
+            color: #ffffff !important;
+        }
+
+        section[data-testid="stSidebar"]
+        .stButton > button[kind="primary"]:hover {
+            background: rgba(255,255,255,0.16) !important;
+        }
+
+
+        /* ====================================================
+        RESET DEMO
+        ==================================================== */
+
+        section[data-testid="stSidebar"] .st-key-reset-demo button {
+            justify-content: center !important;
+            text-align: center !important;
+            background: transparent !important;
+            border: 1px solid rgba(255,255,255,0.25) !important;
+            color: #ffffff !important;
+        }
+
+        section[data-testid="stSidebar"] .st-key-reset-demo button:hover {
+            background: rgba(255,255,255,0.07) !important;
+            border-color: rgba(255,255,255,0.40) !important;
+        }
+
 
 
         /* ====================================================
@@ -117,6 +174,8 @@ def inject_global_styles() -> None:
         button[data-baseweb="tab"] {
             font-weight: 600;
         }
+
+        
 
 
         /* ====================================================
@@ -332,7 +391,63 @@ def inject_global_styles() -> None:
             margin-bottom: 0.65rem;
         }
 
+        /* ====================================================
+        DEMO / SIMULATOR
+        ==================================================== */
 
+        .demo-banner {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.9rem;
+            background: #eef4fa;
+            border: 1px solid #d5e2ef;
+            border-radius: 8px;
+            padding: 1rem 1.1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .demo-badge {
+            display: inline-block;
+            color: #174d7c;
+            background: #dceaf7;
+            border-radius: 999px;
+            padding: 0.25rem 0.55rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .demo-title {
+            color: #253747;
+            font-size: 0.9rem;
+            font-weight: 650;
+        }
+
+        .demo-copy {
+            color: #667685;
+            font-size: 0.8rem;
+            line-height: 1.45;
+            margin-top: 0.18rem;
+        }
+
+        .scenario-box {
+            background: #ffffff;
+            border-left: 3px solid #1261a6;
+            padding: 0.75rem 0.95rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .scenario-title {
+            color: #263746;
+            font-size: 0.86rem;
+            font-weight: 650;
+        }
+
+        .scenario-copy {
+            color: #74808c;
+            font-size: 0.78rem;
+            margin-top: 0.15rem;
+        }
         /* ====================================================
            RESPONSIVE
         ==================================================== */

@@ -64,11 +64,22 @@ def render_known_subscription_charge(
     bank: BankState,
 ) -> None:
 
-    st.subheader("Cobro de suscripción conocida")
+    st.subheader("Nuevo cobro de una suscripción")
 
-    st.caption(
-        "Simula un nuevo cobro de una suscripción que "
-        "ya está registrada en el banco."
+    st.html(
+        """
+        <div class="scenario-box">
+            <div class="scenario-title">
+                Escenario: cambio de precio
+            </div>
+
+            <div class="scenario-copy">
+                Simula un nuevo intento de cobro de una suscripción
+                que el banco ya conoce. Permite comprobar qué ocurre
+                cuando el monto cambia.
+            </div>
+        </div>
+        """
     )
 
     active_subscriptions = [
@@ -230,11 +241,22 @@ def render_new_transaction(
     bank: BankState,
 ) -> None:
 
-    st.subheader("Nueva transacción")
+    st.subheader("Primer cobro de un comercio")
 
-    st.caption(
-        "Simula la llegada del primer cobro de un comercio "
-        "y analízalo con el filtro real."
+    st.html(
+        """
+        <div class="scenario-box">
+            <div class="scenario-title">
+                Escenario: detección desde el primer cobro
+            </div>
+
+            <div class="scenario-copy">
+                Simula una transacción de un comercio que todavía
+                no ha sido clasificado para este cliente.
+                La operación será analizada por el filtro real.
+            </div>
+        </div>
+        """
     )
 
     try:
@@ -678,8 +700,33 @@ def render_simulator(bank: BankState) -> None:
     st.title("Simulador")
 
     st.caption(
-        "Prueba el comportamiento del sistema frente "
-        "a distintos tipos de cobro."
+        "Herramienta de demostración del sistema de protección."
+    )
+
+    st.html(
+        """
+        <div class="demo-banner">
+
+            <span class="demo-badge">
+                MODO DEMO
+            </span>
+
+            <div>
+                <div class="demo-title">
+                    Simulación de eventos bancarios
+                </div>
+
+                <div class="demo-copy">
+                    Esta sección permite generar escenarios para
+                    demostrar el funcionamiento del prototipo.
+                    En una implementación real, estos eventos
+                    llegarían automáticamente desde los sistemas
+                    de pago del banco.
+                </div>
+            </div>
+
+        </div>
+        """
     )
 
     if "subscription_feedback" in st.session_state:
@@ -692,8 +739,8 @@ def render_simulator(bank: BankState) -> None:
 
     known_tab, new_tab = st.tabs(
         [
-            "Cobro de suscripción conocida",
-            "Nueva transacción",
+            "Suscripción existente",
+            "Primer cobro",
         ]
     )
 
