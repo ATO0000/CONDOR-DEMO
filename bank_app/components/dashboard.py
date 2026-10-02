@@ -1,238 +1,406 @@
+from html import escape
+from textwrap import dedent
+
 import streamlit as st
 
 from bank_app.state.bank_state import BankState
 
 
 def format_clp(amount: float) -> str:
-    """
-    Formatea un monto como pesos chilenos.
-    Ejemplo:
-    1250000 -> $1.250.000
-    """
-
-    formatted = f"{amount:,.0f}"
-    formatted = formatted.replace(",", ".")
-
+    formatted = f"{amount:,.0f}".replace(",", ".")
     return f"${formatted}"
 
 
+def render_html(content: str) -> None:
+    """
+    Renderiza HTML directamente, sin pasar por Markdown.
+    """
+    st.html(
+        dedent(content).strip()
+    )
+
+
+def transaction_status(transaction) -> str:
+
+    if transaction.status.value == "PENDING_APPROVAL":
+        return "Pendiente"
+
+    if transaction.status.value == "REJECTED":
+        return "Rechazado"
+
+    if transaction.status.value == "APPROVED":
+        return "Aprobado"
+
+    if transaction.recurring_type == "SUBSCRIPTION":
+        return "Suscripción"
+
+    if transaction.recurring_type == "RECURRING_BILL":
+        return "Pago recurrente"
+
+    return "Compra"
+
+
 def render_dashboard(bank: BankState) -> None:
-    """
-    Renderiza la pantalla principal del banco.
-    """
 
-    st.title("Inicio")
+    active_subscriptions = [
+        subscription
+        for subscription in bank.subscriptions
+        if subscription.status.value == "ACTIVE"
+    ]
 
-    st.caption(
-        "Resumen de tu cuenta y protección de pagos recurrentes."
+    trusted_count = sum(
+        1
+        for subscription in active_subscriptions
+        if subscription.trust_status.value == "TRUSTED"
+    )
+
+    supervised_count = sum(
+        1
+        for subscription in active_subscriptions
+        if subscription.trust_status.value == "UNTRUSTED"
+    )
+
+    pending_count = sum(
+        1
+        for authorization in bank.pending_authorizations
+        if authorization.status.value == "PENDING"
+    )
+
+    pending_candidates = sum(
+        1
+        for candidate in bank.subscription_candidates
+        if candidate.status.value == "PENDING_CONFIRMATION"
     )
 
     # ========================================================
-    # CUENTA PRINCIPAL
+    # HEADER
     # ========================================================
 
-    with st.container(border=True):
-        col1, col2 = st.columns([2, 1])
+    st.title("Inicio")
 
-        with col1:
-            st.caption("Saldo disponible")
-
-            st.markdown(
-                f"## {format_clp(bank.balance)}"
-            )
-
-            st.caption(
-                "Cuenta Corriente •••• 4821"
-            )
-
-        with col2:
-            st.caption("Estado")
-
-            st.success("Cuenta activa")
-
-
-    st.write("")
-
+    render_html(
+        """
+        <div class="page-heading">
+            <div class="subtitle">
+                Resumen de tu cuenta
+            </div>
+        </div>
+        """
+    )
 
     # ========================================================
-    # MÉTRICAS
+    # ACCOUNT
     # ========================================================
 
-    col1, col2, col3, col4 = st.columns(4)
+    render_html(
+        f"""
+        <div class="account-card">
+            <div class="account-top">
 
-    with col1:
-        st.metric(
-            "Movimientos",
-            len(bank.transactions),
-        )
+                <div>
+                    <div class="account-label">
+                        Saldo disponible
+                    </div>
 
-    with col2:
-        active_subscriptions = sum(
-            1
-            for subscription in bank.subscriptions
-            if subscription.status.value == "ACTIVE"
-        )
+                    <div class="account-balance">
+                        {format_clp(bank.balance)}
+                    </div>
 
-        st.metric(
-            "Suscripciones",
-            active_subscriptions,
-        )
+                    <div class="account-number">
+                        Cuenta corriente •••• 4821
+                    </div>
+                </div>
 
-    with col3:
-        st.metric(
-            "Por confirmar",
-            len(bank.subscription_candidates),
-        )
+                <div class="account-type">
+                    Cuenta principal
+                </div>
 
-    with col4:
-        pending_count = sum(
-            1
-            for authorization in bank.pending_authorizations
-            if authorization.status.value == "PENDING"
-        )
-
-        st.metric(
-            "Cobros pendientes",
-            pending_count,
-        )
-
-
-    st.write("")
-
+            </div>
+        </div>
+        """
+    )
 
     # ========================================================
-    # CONTENIDO PRINCIPAL
+    # SUMMARY
     # ========================================================
 
-    left, right = st.columns([1.7, 1])
+    render_html(
+        f"""
+        <div class="summary-strip">
 
+            <div class="summary-item">
+                <div class="summary-label">
+                    Suscripciones
+                </div>
+                <div class="summary-value">
+                    {len(active_subscriptions)}
+                </div>
+            </div>
+
+            <div class="summary-item">
+                <div class="summary-label">
+                    Supervisadas
+                </div>
+                <div class="summary-value">
+                    {supervised_count}
+                </div>
+            </div>
+
+            <div class="summary-item">
+                <div class="summary-label">
+                    De confianza
+                </div>
+                <div class="summary-value">
+                    {trusted_count}
+                </div>
+            </div>
+
+            <div class="summary-item">
+                <div class="summary-label">
+                    Pendientes
+                </div>
+                <div class="summary-value">
+                    {pending_count}
+                </div>
+            </div>
+
+        </div>
+        """
+    )
 
     # ========================================================
-    # MOVIMIENTOS RECIENTES
+    # PROTECTION STATUS
+    # ========================================================
+
+    if pending_count > 0:
+
+        protection_title = (
+            f"{pending_count} cobro"
+            f"{'s' if pending_count != 1 else ''} pendiente"
+            f"{'s' if pending_count != 1 else ''}"
+        )
+
+        protection_copy = (
+            "El cobro está retenido hasta que lo apruebes o rechaces."
+        )
+
+        protection_status = (
+            '<span class="pill pill-alert">'
+            "Requiere atención"
+            "</span>"
+        )
+
+    elif pending_candidates > 0:
+
+        protection_title = (
+            "Hay nuevas suscripciones por revisar"
+        )
+
+        protection_copy = (
+            "Confirma si reconoces los pagos detectados."
+        )
+
+        protection_status = (
+            '<span class="pill pill-watch">'
+            "Por revisar"
+            "</span>"
+        )
+
+    else:
+
+        protection_title = (
+            "Protección de suscripciones activa"
+        )
+
+        protection_copy = (
+            "No hay cobros que requieran una acción."
+        )
+
+        protection_status = (
+            '<span class="pill pill-ok">'
+            "Al día"
+            "</span>"
+        )
+
+    render_html(
+        f"""
+        <div class="protection-card">
+
+            <div>
+                <div class="protection-title">
+                    {protection_title}
+                </div>
+
+                <div class="protection-copy">
+                    {protection_copy}
+                </div>
+            </div>
+
+            {protection_status}
+
+        </div>
+        """
+    )
+
+    # ========================================================
+    # MAIN CONTENT
+    # ========================================================
+
+    left, right = st.columns(
+        [1.35, 1],
+        gap="large",
+    )
+
+    # ========================================================
+    # MOVEMENTS
     # ========================================================
 
     with left:
-        st.subheader("Movimientos recientes")
 
-        with st.container(border=True):
+        render_html(
+            '<div class="section-title">'
+            'Movimientos recientes'
+            '</div>'
+        )
 
-            if not bank.transactions:
-                st.info(
-                    "Todavía no hay movimientos registrados."
+        recent_transactions = sorted(
+            bank.transactions,
+            key=lambda item: item.date,
+            reverse=True,
+        )[:5]
+
+        if not recent_transactions:
+
+            st.info("No hay movimientos recientes.")
+
+        else:
+
+            rows = []
+
+            for transaction in recent_transactions:
+
+                merchant = escape(
+                    transaction.merchant
                 )
 
-            else:
-                recent_transactions = bank.transactions[-5:]
-                recent_transactions.reverse()
+                status = transaction_status(
+                    transaction
+                )
 
-                for transaction in recent_transactions:
+                date_text = transaction.date.strftime(
+                    "%d/%m/%Y"
+                )
 
-                    col_name, col_amount = st.columns([3, 1])
+                rows.append(
+                    dedent(
+                        f"""
+                        <div class="bank-row">
 
-                    with col_name:
-                        st.markdown(
-                            f"**{transaction.merchant}**"
-                        )
+                            <div class="row-main">
 
-                        st.caption(
-                            transaction.date.strftime(
-                                "%d/%m/%Y"
-                            )
-                        )
+                                <div class="row-title">
+                                    {merchant}
+                                </div>
 
-                    with col_amount:
-                        st.markdown(
-                            f"**-{format_clp(transaction.amount)}**"
-                        )
+                                <div class="row-subtitle">
+                                    {date_text} · {status}
+                                </div>
 
-                    st.divider()
+                            </div>
 
+                            <div class="row-amount">
+                                -{format_clp(transaction.amount)}
+                            </div>
+
+                        </div>
+                        """
+                    ).strip()
+                )
+
+            render_html(
+                '<div class="bank-list">'
+                + "".join(rows)
+                + "</div>"
+            )
 
     # ========================================================
-    # CENTRO DE PROTECCIÓN
+    # SUBSCRIPTIONS
     # ========================================================
 
     with right:
-        st.subheader("Centro de protección")
 
-        with st.container(border=True):
-
-            if bank.pending_authorizations:
-                st.warning(
-                    "Tienes cobros esperando tu aprobación."
-                )
-
-            elif bank.subscription_candidates:
-                st.warning(
-                    "Detectamos posibles suscripciones "
-                    "que necesitan tu confirmación."
-                )
-
-            else:
-                st.success(
-                    "No hay cobros que requieran tu atención."
-                )
-
-            st.caption(
-                "Supervisamos tus pagos recurrentes para "
-                "detectar cambios inesperados."
-            )
-
-
-    st.write("")
-
-
-       # ========================================================
-    # SUSCRIPCIONES
-    # ========================================================
-
-    st.subheader("Suscripciones")
-
-    with st.container(border=True):
-
-        active_subscriptions = [
-            subscription
-            for subscription in bank.subscriptions
-            if subscription.status.value == "ACTIVE"
-        ]
+        render_html(
+            '<div class="section-title">'
+            'Suscripciones'
+            '</div>'
+        )
 
         if not active_subscriptions:
 
             st.info(
-                "No tienes suscripciones activas."
+                "No hay suscripciones activas."
             )
 
         else:
 
-            for subscription in active_subscriptions[:4]:
+            rows = []
 
-                col1, col2, col3 = st.columns(
-                    [2, 1, 1]
+            for subscription in active_subscriptions[:5]:
+
+                merchant = escape(
+                    subscription.merchant
                 )
 
-                with col1:
-                    st.markdown(
-                        f"**{subscription.merchant}**"
+                frequency = escape(
+                    subscription.frequency
+                )
+
+                if (
+                    subscription.trust_status.value
+                    == "TRUSTED"
+                ):
+
+                    status_html = (
+                        '<span class="pill pill-ok">'
+                        "De confianza"
+                        "</span>"
                     )
 
-                    st.caption(
-                        subscription.recurring_type
+                else:
+
+                    status_html = (
+                        '<span class="pill pill-watch">'
+                        "Supervisada"
+                        "</span>"
                     )
 
-                with col2:
-                    st.write(
-                        format_clp(
-                            subscription.current_price
-                        )
-                    )
+                rows.append(
+                    dedent(
+                        f"""
+                        <div class="bank-row">
 
-                with col3:
+                            <div class="row-main">
 
-                    if (
-                        subscription.trust_status.value
-                        == "TRUSTED"
-                    ):
-                        st.success("De confianza")
+                                <div class="row-title">
+                                    {merchant}
+                                </div>
 
-                    else:
-                        st.warning("Supervisada")
+                                <div class="row-subtitle">
+                                    {format_clp(subscription.current_price)}
+                                    · {frequency}
+                                </div>
+
+                            </div>
+
+                            {status_html}
+
+                        </div>
+                        """
+                    ).strip()
+                )
+
+            render_html(
+                '<div class="bank-list">'
+                + "".join(rows)
+                + "</div>"
+            )

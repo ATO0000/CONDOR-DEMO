@@ -5,13 +5,26 @@ from bank_app.state.session_state import (
     get_bank_state,
     reset_bank_state,
 )
+from bank_app.styles import inject_global_styles
 
+
+# ============================================================
+# PAGE CONFIG
+# ============================================================
 
 st.set_page_config(
     page_title="Banco Digital",
-    page_icon="🏦",
+    page_icon="🛡️",
     layout="wide",
+    initial_sidebar_state="expanded",
 )
+
+
+# ============================================================
+# GLOBAL STYLES
+# ============================================================
+
+inject_global_styles()
 
 
 # ============================================================
@@ -27,10 +40,10 @@ bank = get_bank_state()
 
 with st.sidebar:
 
-    st.title("🏦 Banco Digital")
+    st.markdown("## 🛡️ Banco Digital")
 
     st.caption(
-        "Protección inteligente de suscripciones"
+        "Protección inteligente de pagos recurrentes"
     )
 
     st.divider()
@@ -44,12 +57,29 @@ with st.sidebar:
             "Autorizaciones",
             "Simulador",
         ],
+        label_visibility="collapsed",
     )
 
     st.divider()
 
+    pending_count = sum(
+        1
+        for authorization in bank.pending_authorizations
+        if authorization.status.value == "PENDING"
+    )
+
+    if pending_count > 0:
+        st.warning(
+            f"{pending_count} cobro"
+            f"{'s' if pending_count != 1 else ''} "
+            f"requiere"
+            f"{'n' if pending_count != 1 else ''} tu atención."
+        )
+
+    st.caption("Entorno de demostración")
+
     if st.button(
-        "Reiniciar demo",
+        "↻ Reiniciar demo",
         use_container_width=True,
     ):
         reset_bank_state()
@@ -67,14 +97,18 @@ if selected_page == "Inicio":
 
 elif selected_page == "Movimientos":
 
-    from bank_app.components.movements import render_movements
+    from bank_app.components.movements import (
+        render_movements,
+    )
 
     render_movements(bank)
 
 
 elif selected_page == "Suscripciones":
 
-    from bank_app.components.subscriptions import render_subscriptions
+    from bank_app.components.subscriptions import (
+        render_subscriptions,
+    )
 
     render_subscriptions(bank)
 
@@ -90,6 +124,8 @@ elif selected_page == "Autorizaciones":
 
 elif selected_page == "Simulador":
 
-    from bank_app.components.simulator import render_simulator
+    from bank_app.components.simulator import (
+        render_simulator,
+    )
 
     render_simulator(bank)
