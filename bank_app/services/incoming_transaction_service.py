@@ -13,6 +13,14 @@ from bank_app.services.filter_adapter import (
 )
 
 from bank_app.state.bank_state import BankState
+from bank_app.services.subscription_detection_policy import (
+    SubscriptionDetectionAction,
+    decide_subscription_action,
+)
+from bank_app.services.subscription_service import (
+    create_subscription_from_transaction,
+    find_active_subscription,
+)
 
 
 def process_incoming_transaction(
@@ -26,8 +34,8 @@ def process_incoming_transaction(
     Flujo:
     1. La transacción pasa por el filtro real.
     2. Se registra como movimiento.
-    3. Si el filtro detecta una SUBSCRIPTION,
-       se crea un SubscriptionCandidate.
+    3. La política del DT registra una suscripción automáticamente,
+       solicita confirmación o mantiene el procesamiento normal.
     """
     demo_transaction_key = (
         f"{raw_transaction.get('customer_id', 'UNKNOWN')}"
@@ -100,11 +108,24 @@ def process_incoming_transaction(
     # POSIBLE NUEVA SUSCRIPCIÓN
     # ========================================================
 
-    if (
-        analysis.is_recurring
-        and analysis.recurring_type
-        == "SUBSCRIPTION"
-    ):
+    action = decide_subscription_action(analysis)
+
+    if action == SubscriptionDetectionAction.AUTO_DETECTED:
+        if find_active_subscription(
+            bank, transaction.merchant_id, transaction.merchant
+        ) is None:
+            create_subscription_from_transaction(
+                bank,
+                transaction,
+                merchant=transaction.merchant,
+                merchant_id=transaction.merchant_id,
+                recurring_type=analysis.recurring_type,
+                recurrence_confidence=analysis.recurrence_confidence,
+                type_confidence=analysis.type_confidence,
+                reasons=analysis.reasons,
+            )
+
+    elif action == SubscriptionDetectionAction.NEEDS_CONFIRMATION:
 
         candidate = SubscriptionCandidate(
             id=f"candidate-{uuid4().hex[:8]}",

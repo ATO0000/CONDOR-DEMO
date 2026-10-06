@@ -1,5 +1,7 @@
 from html import escape
 
+from bank_app.state.bank_state import BankState
+
 import streamlit as st
 
 from bank_app.app_models import (
@@ -8,9 +10,8 @@ from bank_app.app_models import (
     TrustStatus,
 )
 
-from bank_app.services.subscription_service import (
-    confirm_subscription_candidate,
-    reject_subscription_candidate,
+from bank_app.components.subscription_candidate_actions import (
+    render_candidate_actions,
 )
 
 
@@ -137,6 +138,9 @@ def render_subscription(
         st.html(
             status_pill(subscription)
         )
+
+    if subscription.needs_user_verification:
+        st.caption("Por verificar")
 
     # ========================================================
     # DETAILS
@@ -366,6 +370,9 @@ def render_subscriptions(bank: BankState) -> None:
 
     st.title("Suscripciones")
 
+    if "subscription_feedback" in st.session_state:
+        st.success(st.session_state.pop("subscription_feedback"))
+
     st.caption(
         "Administra tus pagos recurrentes y su nivel de confianza."
     )
@@ -430,54 +437,7 @@ def render_subscriptions(bank: BankState) -> None:
                         "Primer cobro"
                     )
 
-                st.write(
-                    "¿Reconoces este pago como una suscripción?"
-                )
-
-                yes_col, no_col = st.columns(2)
-
-                with yes_col:
-
-                    if st.button(
-                        "Sí, agregar a suscripciones",
-                        key=f"confirm-sub-{candidate.id}",
-                        type="primary",
-                        use_container_width=True,
-                    ):
-
-                        try:
-
-                            confirm_subscription_candidate(
-                                bank,
-                                candidate.id,
-                            )
-
-                            st.rerun()
-
-                        except ValueError as error:
-
-                            st.error(str(error))
-
-                with no_col:
-
-                    if st.button(
-                        "No es una suscripción",
-                        key=f"reject-sub-{candidate.id}",
-                        use_container_width=True,
-                    ):
-
-                        try:
-
-                            reject_subscription_candidate(
-                                bank,
-                                candidate.id,
-                            )
-
-                            st.rerun()
-
-                        except ValueError as error:
-
-                            st.error(str(error))
+                render_candidate_actions(bank, candidate, key_prefix="subscriptions")
 
         st.write("")
 

@@ -29,6 +29,7 @@ class SubscriptionCandidateStatus(str, Enum):
     PENDING_CONFIRMATION = "PENDING_CONFIRMATION"
     CONFIRMED = "CONFIRMED"
     REJECTED_BY_USER = "REJECTED_BY_USER"
+    UNSURE_BY_USER = "UNSURE_BY_USER"
 
 
 class AuthorizationStatus(str, Enum):
@@ -82,6 +83,7 @@ class Subscription:
 
     detection_reasons: List[str] = field(default_factory=list)
     transaction_history: List[str] = field(default_factory=list)
+    needs_user_verification: bool = False
 
 
 # ============================================================

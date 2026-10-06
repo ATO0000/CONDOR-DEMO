@@ -1,3 +1,7 @@
+from bank_app.services.subscription_detection_policy import (
+    SubscriptionDetectionAction,
+    decide_subscription_action,
+)
 import json
 from pathlib import Path
 
@@ -10,9 +14,8 @@ from bank_app.app_models import (
 from bank_app.services.incoming_transaction_service import (
     process_incoming_transaction,
 )
-from bank_app.services.subscription_service import (
-    confirm_subscription_candidate,
-    reject_subscription_candidate,
+from bank_app.components.subscription_candidate_actions import (
+    render_candidate_actions,
 )
 from bank_app.services.transaction_service import (
     simulate_subscription_charge,
@@ -353,9 +356,12 @@ def render_new_transaction(
         key="incoming-transaction-selector",
     )
 
-    raw_transaction = transaction_options[
-        selected_label
-    ]
+    if not transaction_options:
+        st.info("No quedan nuevas transacciones de demostración disponibles.")
+        render_pending_candidates(bank)
+        return
+
+    raw_transaction = transaction_options[selected_label]
 
     # --------------------------------------------------------
     # RESUMEN
@@ -465,7 +471,15 @@ def render_new_transaction(
 
             st.divider()
 
-            if not analysis.is_recurring:
+            action = decide_subscription_action(analysis)
+
+            if action == SubscriptionDetectionAction.AUTO_DETECTED:
+                st.success(
+                    f"Detectamos una nueva suscripción: {transaction.merchant} · "
+                    f"{format_clp(transaction.amount)}"
+                )
+
+            elif not analysis.is_recurring:
 
                 st.success(
                     "Transacción procesada como compra normal."
@@ -476,18 +490,15 @@ def render_new_transaction(
                     f"**{analysis.recurring_type}**."
                 )
 
-            elif (
-                analysis.recurring_type
-                == "SUBSCRIPTION"
-            ):
+            elif action == SubscriptionDetectionAction.NEEDS_CONFIRMATION:
 
                 st.warning(
-                    "🔁 Posible suscripción detectada"
+                    "Posible suscripción detectada"
                 )
 
                 st.write(
-                    "Detectamos que este comercio probablemente "
-                    "realizará cobros periódicos."
+                    "Detectamos señales de que este comercio podría realizar "
+                    "cobros periódicos."
                 )
 
                 st.write(
@@ -546,6 +557,10 @@ def render_new_transaction(
                 f"{error}"
             )
 
+    render_pending_candidates(bank)
+
+
+def render_pending_candidates(bank: BankState) -> None:
     # ========================================================
     # CANDIDATOS PENDIENTES
     # ========================================================
@@ -586,15 +601,6 @@ def render_new_transaction(
                 f"### {candidate.merchant}"
             )
 
-            st.write(
-                "Detectamos que este comercio probablemente "
-                "realizará cobros periódicos."
-            )
-
-            st.markdown(
-                "**¿Corresponde a una suscripción?**"
-            )
-
             col1, col2, col3 = st.columns(3)
 
             with col1:
@@ -629,66 +635,7 @@ def render_new_transaction(
                 for reason in candidate.reasons:
                     st.write(f"- {reason}")
 
-            yes_col, no_col = st.columns(2)
-
-            with yes_col:
-
-                if st.button(
-                    "Sí, es una suscripción",
-                    key=f"confirm-{candidate.id}",
-                    type="primary",
-                    use_container_width=True,
-                ):
-
-                    try:
-
-                        subscription = (
-                            confirm_subscription_candidate(
-                                bank,
-                                candidate.id,
-                            )
-                        )
-
-                        st.session_state[
-                            "subscription_feedback"
-                        ] = (
-                            f"{subscription.merchant} fue agregada "
-                            f"como suscripción supervisada."
-                        )
-
-                        st.rerun()
-
-                    except ValueError as error:
-
-                        st.error(str(error))
-
-            with no_col:
-
-                if st.button(
-                    "No, no es una suscripción",
-                    key=f"reject-candidate-{candidate.id}",
-                    use_container_width=True,
-                ):
-
-                    try:
-
-                        reject_subscription_candidate(
-                            bank,
-                            candidate.id,
-                        )
-
-                        st.session_state[
-                            "subscription_feedback"
-                        ] = (
-                            f"{candidate.merchant} no fue agregado "
-                            f"a tus suscripciones."
-                        )
-
-                        st.rerun()
-
-                    except ValueError as error:
-
-                        st.error(str(error))
+            render_candidate_actions(bank, candidate, key_prefix="simulator")
 
 
 # ============================================================
