@@ -21,6 +21,14 @@ from bank_app.services.transaction_service import (
     simulate_subscription_charge,
 )
 from bank_app.state.bank_state import BankState
+from bank_app.services.controlled_demo_service import (
+    DEMO_AMOUNT,
+    DEMO_MERCHANT,
+    DEMO_NOTICE,
+    DEMO_TRANSACTION_KEY,
+    intermediate_demo_analysis,
+    process_intermediate_demo,
+)
 
 
 # ============================================================
@@ -245,6 +253,17 @@ def render_new_transaction(
 ) -> None:
 
     st.subheader("Primer cobro de un comercio")
+
+    scenario = st.segmented_control(
+        "Escenarios",
+        ["Transacción normal", "Confianza intermedia"],
+        default="Transacción normal",
+        key="first-charge-scenario",
+    )
+    if scenario == "Confianza intermedia":
+        render_controlled_demo(bank)
+        render_pending_candidates(bank)
+        return
 
     st.html(
         """
@@ -558,6 +577,40 @@ def render_new_transaction(
             )
 
     render_pending_candidates(bank)
+
+
+def render_controlled_demo(bank: BankState) -> None:
+    st.info(DEMO_NOTICE)
+    st.write(
+        "Este caso utiliza una confianza intermedia simulada para probar qué ocurre "
+        "cuando el sistema sospecha que un pago es una suscripción, pero no tiene "
+        "confianza suficiente para clasificarlo automáticamente. "
+        "El resultado no proviene del filtro real."
+    )
+    with st.container(border=True):
+        st.markdown(f"### {DEMO_MERCHANT} · {format_clp(DEMO_AMOUNT)}")
+        st.caption("El primer cobro se descontará una sola vez.")
+    with st.expander("Información del detector"):
+        analysis = intermediate_demo_analysis()
+        st.caption("Análisis controlado para demostración")
+        st.write(f"Confianza de recurrencia: {format_confidence(analysis.recurrence_confidence)}")
+        st.write(f"Confianza del tipo: {format_confidence(analysis.type_confidence)}")
+    processed = DEMO_TRANSACTION_KEY in bank.processed_demo_transactions
+    if processed:
+        st.caption("Este escenario ya fue procesado. Reinicia la demo para repetirlo.")
+    if st.button(
+        "Procesar escenario controlado",
+        key="process-controlled-demo",
+        type="primary",
+        width="stretch",
+        disabled=processed,
+    ):
+        try:
+            process_intermediate_demo(bank)
+        except ValueError as error:
+            st.error(str(error))
+        else:
+            st.rerun()
 
 
 def render_pending_candidates(bank: BankState) -> None:

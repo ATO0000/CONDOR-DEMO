@@ -37,6 +37,12 @@ def process_incoming_transaction(
     3. La política del DT registra una suscripción automáticamente,
        solicita confirmación o mantiene el procesamiento normal.
     """
+    _check_not_processed(bank, raw_transaction)
+    analysis = analyze_bank_transaction(raw_transaction)
+    return process_analyzed_transaction(bank, raw_transaction, analysis)
+
+
+def _check_not_processed(bank: BankState, raw_transaction: dict) -> str:
     demo_transaction_key = (
         f"{raw_transaction.get('customer_id', 'UNKNOWN')}"
         f"|{raw_transaction.get('merchant_id', 'UNKNOWN')}"
@@ -49,13 +55,20 @@ def process_incoming_transaction(
         raise ValueError(
             "Esta transacción de demostración ya fue procesada."
         )
-    # ========================================================
-    # FILTRO REAL
-    # ========================================================
+    return demo_transaction_key
 
-    analysis = analyze_bank_transaction(
-        raw_transaction
-    )
+
+def process_analyzed_transaction(
+    bank: BankState,
+    raw_transaction: dict,
+    analysis: FilterAnalysis,
+) -> tuple[Transaction, FilterAnalysis]:
+    """Aplica la política y registra un cobro ya analizado una sola vez.
+
+    Punto compartido interno: el flujo normal obtiene siempre su análisis
+    del filtro real; únicamente el servicio DEMO construye uno controlado.
+    """
+    demo_transaction_key = _check_not_processed(bank, raw_transaction)
 
     # ========================================================
     # TRANSACTION DEL GEMELO DIGITAL
