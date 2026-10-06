@@ -1,3 +1,4 @@
+from bank_app.components.manual_transaction import render_manual_transaction
 from bank_app.services.subscription_detection_policy import (
     SubscriptionDetectionAction,
     decide_subscription_action,
@@ -255,16 +256,21 @@ def render_new_transaction(
     st.subheader("Primer cobro de un comercio")
 
     scenario = st.segmented_control(
-        "Escenarios",
-        ["Transacción normal", "Confianza intermedia"],
-        default="Transacción normal",
+        "Origen del cobro",
+        ["Dataset de demostración", "Crear cobro manual", "Confianza intermedia"],
+        default="Dataset de demostración",
         key="first-charge-scenario",
     )
+    if scenario == "Crear cobro manual":
+        render_manual_transaction(bank)
+        render_pending_candidates(bank)
+        return
     if scenario == "Confianza intermedia":
         render_controlled_demo(bank)
         render_pending_candidates(bank)
         return
 
+    st.caption("Dataset de demostración → FILTRO REAL")
     st.html(
         """
         <div class="scenario-box">
